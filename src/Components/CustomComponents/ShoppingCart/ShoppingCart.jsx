@@ -89,7 +89,7 @@ const ShoppingCart = ({ positionInfo, setPositionInfo }) => {
       //   className={`fixed z-30 top-16 ${positionInfo?.right} w-screen h-screen bg-[#f5f5f5] bg-opacity-70 transition-all duration-500`}
       // >
       //   <div className={`absolute z-40 ${positionInfo?.right} w-[28%] h-full bg-white shadow-lg opacity-100 py-10 pr-5 pl-7 transition-all duration-500`}>
-      className={`fixed z-30 top-16 ${positionInfo?.right} w-screen h-screen bg-[#f5f5f5] bg-opacity-70 transition-all duration-500`}
+      className={`${positionInfo?.right} !w-screen !h-screen !bg-[#f5f5f5] !bg-opacity-70 transition-all duration-500`}
     >
       <div className={`z-40 ${positionInfo?.right} w-[28%] h-full bg-white shadow-lg opacity-100 py-10 pr-5 pl-7 transition-all duration-500`}>
         <RxCross2
