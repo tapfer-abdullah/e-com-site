@@ -205,7 +205,7 @@ const AddPage = () => {
               <div className="w-full">
                 <label>Custom URL</label>
                 <Switch checked={checked} onChange={handleChange} inputProps={{ "aria-label": "controlled" }} />
-                {checked && <p className="text-sm my-1">( Don't add "/" starting of the link )</p>}
+                {checked && <p className="text-sm my-1">( Don&apos;t add &quot;/&quot; starting of the link )</p>}
                 {checked && (
                   <input
                     value={customURL}
