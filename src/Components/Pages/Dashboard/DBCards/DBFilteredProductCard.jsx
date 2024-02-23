@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { FaChevronCircleRight } from "react-icons/fa";
 import { MdOutlineEuroSymbol } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";

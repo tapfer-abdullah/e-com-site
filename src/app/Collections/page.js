@@ -1,7 +1,7 @@
 "use client"
 import Collections from "@/Components/Pages/Collections/Collections";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { IoIosArrowForward } from "react-icons/io";
 import { axiosHttp } from "../helper/axiosHttp";
 

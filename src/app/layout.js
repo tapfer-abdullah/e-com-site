@@ -3,6 +3,8 @@ import Footer from '@/Components/Shared-Pages/Footer'
 import NavBar from '@/Components/Shared-Pages/NavBar'
 import OrderState from '@/Components/State/OrderState'
 import { Inter } from 'next/font/google'
+import React from 'react'
+
 import { usePathname } from 'next/navigation'
 import './globals.css'
 

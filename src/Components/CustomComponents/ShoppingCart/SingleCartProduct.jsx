@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { MdOutlineEuroSymbol } from "react-icons/md";
 
 import { useState } from "react";

@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 const SectionTitle = ({ title, subTitle }) => {
   return (

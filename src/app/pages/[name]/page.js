@@ -1,4 +1,5 @@
 "use client"
+import React from 'react';
 import ReactHtmlParser from 'react-html-parser';
 
 import Loader from '@/Hooks/Loader/Loader';

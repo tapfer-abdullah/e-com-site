@@ -2,6 +2,8 @@
 import Loader from '@/Hooks/Loader/Loader';
 import { axiosHttp } from '@/app/helper/axiosHttp';
 import Link from 'next/link';
+import React from 'react';
+
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { IoIosArrowForward } from 'react-icons/io';
