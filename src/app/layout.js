@@ -5,8 +5,14 @@ import OrderState from '@/Components/State/OrderState'
 import { Inter } from 'next/font/google'
 import React from 'react'
 
+if (typeof window === 'undefined') {
+  global.window = {};
+}
+
 import { usePathname } from 'next/navigation'
 import './globals.css'
+
+
 
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'

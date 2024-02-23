@@ -19,7 +19,7 @@ import "./AddProduct.css";
 
 import dynamic from "next/dynamic";
 
-const DynamicJoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 const sizes = [
   { value: "One Size", label: "One Size" },
