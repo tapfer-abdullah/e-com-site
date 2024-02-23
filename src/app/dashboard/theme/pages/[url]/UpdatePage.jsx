@@ -2,13 +2,17 @@
 import Loader from "@/Hooks/Loader/Loader";
 import { axiosHttp } from "@/app/helper/axiosHttp";
 import Switch from "@mui/material/Switch";
-import JoditEditor from "jodit-react";
+// import JoditEditor from "jodit-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdDeleteForever } from "react-icons/md";
+
+import dynamic from "next/dynamic";
+
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 import Swal from "sweetalert2";
 

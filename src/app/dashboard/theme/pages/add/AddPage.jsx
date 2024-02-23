@@ -1,12 +1,15 @@
 "use client";
 import { axiosHttp } from "@/app/helper/axiosHttp";
 import Switch from "@mui/material/Switch";
-import JoditEditor from "jodit-react";
+// import JoditEditor from "jodit-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import Swal from "sweetalert2";
+
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 const AddPage = () => {
   const router = useRouter();

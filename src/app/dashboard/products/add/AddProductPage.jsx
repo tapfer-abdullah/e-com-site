@@ -6,7 +6,7 @@ import { TextField } from "@mui/material";
 import Loader from "@/Hooks/Loader/Loader";
 import { axiosHttp } from "@/app/helper/axiosHttp";
 import axios from "axios";
-import JoditEditor from "jodit-react";
+// import JoditEditor from "jodit-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -16,6 +16,10 @@ import CreatableSelect from "react-select/creatable";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import "./AddProduct.css";
+
+import dynamic from "next/dynamic";
+
+const DynamicJoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 const sizes = [
   { value: "One Size", label: "One Size" },

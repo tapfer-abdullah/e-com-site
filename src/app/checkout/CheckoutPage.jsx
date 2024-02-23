@@ -50,7 +50,7 @@ const CheckoutPage = () => {
   const [shippingAmount, setShippingAmount] = useState(10);
   const [shippingReqAmount, setShippingReqAmount] = useState(0);
 
-  console.log({ email, selectedCountry, shipping, shippingAmount, minusAmount });
+  // console.log({ email, selectedCountry, shipping, shippingAmount, minusAmount });
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -146,7 +146,7 @@ const CheckoutPage = () => {
             setDiscountOn(data?.Get?.option);
             setBuyOnOption(data?.Buy?.option);
 
-            console.log({ data });
+            // console.log({ data });
 
             let BxGyMaxUsesPerOrder2 = 0;
             if (data?.MaxUser?.option) {
@@ -247,7 +247,7 @@ const CheckoutPage = () => {
 
               if (reqGet > reqBuy && Buy < aBuy && Free < aGet) {
                 if (aGet < i * reqGet && i * reqBuy + i * reqGet - (aGet - Free) < total) {
-                  console.log("if-2", { Free });
+                  // console.log("if-2", { Free });
                   Free = aGet;
                   Buy = total - Free;
                 }
@@ -351,7 +351,7 @@ const CheckoutPage = () => {
             const data = validCode?.additionalData?.FS;
             if (data?.freeShipping?.option == "specific") {
               //all
-              console.log({ all: data?.freeShipping?.value, selectedCountry });
+              // console.log({ all: data?.freeShipping?.value, selectedCountry });
               if (!selectedCountry) {
                 return Swal.fire({
                   title: "Country require!",
@@ -362,7 +362,7 @@ const CheckoutPage = () => {
                   cancelButtonColor: "#d33",
                   confirmButtonText: "Enter country?",
                 }).then(async (result2) => {
-                  console.log({ result2 });
+                  // console.log({ result2 });
                   if (result2.isConfirmed) {
                     handleOpen();
                   } else {
