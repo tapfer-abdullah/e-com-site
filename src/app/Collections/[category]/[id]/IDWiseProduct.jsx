@@ -24,6 +24,7 @@ const IDWiseProduct = ({ imageData, rightSlider, leftSlider, imgIndex, setImgInd
       <div className="flex items-center gap-2 flex-wrap">
         {imageData?.map((i, index) => (
           <img
+            key={i}
             onClick={() => {
               setImgIndex(index);
               handleSku(selectedSize, index);
