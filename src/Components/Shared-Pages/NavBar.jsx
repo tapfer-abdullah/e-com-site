@@ -28,8 +28,8 @@ const NavBar = () => {
 
   return (
     <div>
-      <div className="mobile lg:hidden">mobile</div>
-      <div className="hidden md:block md:fixed top-0 left-0 z-50 w-screen">
+      <div className="!lg:hidden">mobile</div>
+      <div className="!hidden !md:block !md:fixed !top-0 !left-0 !z-50 !w-screen">
         <div className="bg-[#31a3a3] text-white font-sans font-semibold flex justify-around py-4 text-xl">
           <Link href="/" className="text-3xl font-semibold uppercase">
             OdbhootStore
