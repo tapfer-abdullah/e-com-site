@@ -1,6 +1,6 @@
 "use client";
 import { OrderStateProvider } from "@/Components/State/OrderState";
-import { default as React, default as React, useContext, useEffect, useState } from "react";
+import { default as React, useContext, useEffect, useState } from "react";
 import { FiMinus } from "react-icons/fi";
 import { MdDiscount, MdOutlineEuroSymbol } from "react-icons/md";
 import BxGyCart from "./CheckoutCardComponent/BxGyCart";

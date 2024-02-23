@@ -1,6 +1,5 @@
 "use client";
 import TextField from "@mui/material/TextField";
-import React from "react";
 // import Select from "react-select";
 import "./Checkout.css";
 
