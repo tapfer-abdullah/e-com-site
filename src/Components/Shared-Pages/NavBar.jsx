@@ -70,7 +70,8 @@ const NavBar = () => {
               <span className="absolute -top-3 -right-3 bg-red-500 rounded-full py-[2px] px-[8px] text-sm">{cartData?.length || 0}</span>
               <AiOutlineShopping
                 onClick={() => {
-                  setPositionInfo({ right: "right-0", customOpacity: 70 });
+                  // setPositionInfo({ right: "right-0", customOpacity: 70 });
+                  setPositionInfo({ right: "block", customOpacity: 70 });
                 }}
                 className="text-3xl"
               />
