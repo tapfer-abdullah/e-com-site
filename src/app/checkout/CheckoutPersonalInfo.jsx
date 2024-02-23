@@ -9,8 +9,8 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import React, { useContext, useEffect, useState } from "react";
 import { MdOutlineEuroSymbol } from "react-icons/md";
-import Payment from "./Payment/Payment";
-import PreviewPage from "./Payment/Payment2";
+// import Payment from "./Payment/Payment";
+// import PreviewPage from "./Payment/Payment2";
 
 const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedCountry, setEmail, email }) => {
   const { allCountryData } = useContext(OrderStateProvider);
@@ -116,7 +116,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
         <p>Free</p>
       </div>
 
-      <Payment />
+      {/* <Payment /> */}
 
       <h4 className="text-xl font-semibold mt-7 mb-2 ">Add tip</h4>
       <div className="border border-[#d0d0d0] rounded-md ">
