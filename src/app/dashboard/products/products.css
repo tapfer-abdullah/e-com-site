@@ -1,0 +1,16 @@
+.products-table table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.products-table td,
+th {
+    /* border: 1px solid #bec5c5; */
+    text-align: left;
+    padding: 8px;
+}
+
+.products-table tr:nth-child(even) {
+    background-color: #dddddd;
+}

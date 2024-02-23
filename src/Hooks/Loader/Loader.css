@@ -1,0 +1,21 @@
+/* .zero-span>div>svg {
+    width: 50px;
+    margin: -17px; */
+/* } */
+
+.zero-span>div {
+    width: 70px;
+    height: 70px;
+    margin: -24px;
+}
+
+.dot-span>div {
+    width: 100px;
+    height: 100px;
+    margin: -20px;
+    margin-top: -12px;
+}
+
+.loader-text {
+    color: #e8c166c5;
+}

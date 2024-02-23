@@ -1,14 +1,17 @@
-import BasicTable from "./pages/Table";
+import Banner from '@/Components/Pages/Home/Banner/Banner';
+import HomePolicy from '@/Components/Pages/Home/HomePolicy/HomePolicy';
+import NewArrival from '@/Components/Pages/Home/NewArrival/NewArrival';
+import Products from '@/Components/Pages/Home/Products/Products';
+// import 'core-js'; //for self
 
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-
-      <BasicTable />
-
-
-
-    </main>
+    <div className=''>
+      <Banner />
+      <NewArrival />
+      <Products />
+      <HomePolicy />
+    </div>
   );
 }

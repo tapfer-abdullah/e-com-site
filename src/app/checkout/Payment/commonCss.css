@@ -1,0 +1,17 @@
+/* #cardCvc+#cvcLabel {
+    transform: translateY(-1.5em) scale(0.8);
+    transition: transform 0.2s ease-out, color 0.2s ease-out;
+    color: #555;
+}
+
+#cardCvc:focus+#cvcLabel {
+    color: #000;
+} */
+
+#cardCvc:focus+#cardCvcLabel {
+    border: 5px solid red !important;
+    color: blueviolet !important;
+    font-weight: 900 !important;
+}
+
+#cardCvcLabel {}

@@ -1,0 +1,25 @@
+/* react-tabs__tab react-tabs__tab--selected */
+.react-tabs {
+    text-align: center !important;
+
+}
+
+.react-tabs__tab-list {
+    border: none !important;
+}
+
+.react-tabs__tab--selected {
+    color: rgba(226, 38, 126, 0.914) !important;
+    border: none !important;
+
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+    background-color: rgb(255, 255, 255);
+    opacity: 80%;
+    padding: 5px 10px;
+    border-radius: 10px;
+    width: 50px;
+    height: 50px;
+}
