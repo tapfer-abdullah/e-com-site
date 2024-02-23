@@ -28,8 +28,8 @@ const NavBar = () => {
 
   return (
     <div>
-      <div className="!lg:hidden">mobile</div>
-      <div className="!hidden !md:block !md:fixed !top-0 !left-0 !z-50 !w-screen">
+      <div className="mobile lg:hidden">mobile</div>
+      <div className="hidden md:block md:fixed top-0 left-0 z-50 w-screen">
         <div className="bg-[#31a3a3] text-white font-sans font-semibold flex justify-around py-4 text-xl">
           <Link href="/" className="text-3xl font-semibold uppercase">
             OdbhootStore
@@ -70,8 +70,7 @@ const NavBar = () => {
               <span className="absolute -top-3 -right-3 bg-red-500 rounded-full py-[2px] px-[8px] text-sm">{cartData?.length || 0}</span>
               <AiOutlineShopping
                 onClick={() => {
-                  // setPositionInfo({ right: "right-0", customOpacity: 70 });
-                  setPositionInfo({ right: "block", customOpacity: 70 });
+                  setPositionInfo({ right: "right-0", customOpacity: 70 });
                 }}
                 className="text-3xl"
               />

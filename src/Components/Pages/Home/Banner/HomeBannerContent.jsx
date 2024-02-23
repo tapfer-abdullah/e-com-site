@@ -1,13 +1,12 @@
 "use client";
 import Link from "next/link";
-import React from "react";
 // import { Slide } from "react-awesome-reveal";
 import "../Home.css";
 
 const HomeBannerContent = ({ title, destination, bgImg }) => {
   return (
     <div style={{ backgroundImage: `url('${bgImg}')` }} className="bgBannerImg text-white bg-[black]">
-      <div className="!w-full !h-full !bg-[black] !bg-opacity-50">
+      <div className="w-full h-full bg-[black] bg-opacity-50">
         <div className=" px-5 md:px-24 pt-24 pb-5 md:pb-32 md:pt-56 space-y-3 flex flex-col justify-center text-center md:w-1/2 mx-auto">
           <h3 className="aaa text-3xl font-semibold">{title}</h3>
           <p>{destination}</p>
