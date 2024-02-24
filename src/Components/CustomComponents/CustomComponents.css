@@ -73,3 +73,34 @@ body .show-modal {
     background-color: black;
 
 }
+
+/* Shopping cart sidebar css */
+.shoppingCartOverlay {
+    /* fixed z-30 top-16 ${positionInfo?.right} w-screen h-screen bg-[#f5f5f5] bg-opacity-70 transition-all duration-500 */
+    position: fixed;
+    top: 64px;
+    height: 100vh;
+    width: 100vw;
+    z-index: 3;
+
+}
+
+.shoppingCartContent {
+    position: absolute;
+    z-index: 4;
+}
+
+/* @media only screen and (min-width: 992px) {
+    .shoppingCartOverlay {
+        display: none;
+    }
+
+    .shoppingCartContent {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 5;
+        width: 10vw;
+    }
+} */

@@ -6,6 +6,7 @@ import { AiOutlineShopping } from "react-icons/ai";
 import { IoIosArrowForward, IoIosSearch } from "react-icons/io";
 import ShoppingCart from "../CustomComponents/ShoppingCart/ShoppingCart";
 import { OrderStateProvider } from "../State/OrderState";
+import "./Nav.css";
 
 const NavBar = () => {
   const [positionInfo, setPositionInfo] = useState({ right: "-right-[2000px]", customOpacity: 0 });
@@ -28,9 +29,9 @@ const NavBar = () => {
 
   return (
     <div>
-      <div className="mobile lg:hidden">mobile</div>
-      <div className="hidden md:block md:fixed top-0 left-0 z-50 w-screen">
-        <div className="bg-[#31a3a3] text-white font-sans font-semibold flex justify-around py-4 text-xl">
+      <div className="mobile">mobile</div>
+      <div className="big-screen">
+        <div className="!w-screen bg-[#31a3a3] text-white font-sans font-semibold flex justify-around py-4 text-xl">
           <Link href="/" className="text-3xl font-semibold uppercase">
             OdbhootStore
           </Link>

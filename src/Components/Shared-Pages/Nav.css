@@ -1,0 +1,22 @@
+.mobile {
+    display: block;
+}
+
+.big-screen {
+    display: none;
+}
+
+@media only screen and (min-width: 992px) {
+    .mobile {
+        display: none;
+    }
+
+    .big-screen {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 5;
+        width: 10vw;
+    }
+}

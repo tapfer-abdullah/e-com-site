@@ -4,6 +4,7 @@ import { MdOutlineEuroSymbol } from "react-icons/md";
 
 import { useState } from "react";
 import { RxCross2 } from "react-icons/rx";
+import "../CustomComponents.css";
 
 const SingleCartProduct = ({ index, data, handleQuantity, handleDelete, setAction }) => {
   const [selectedItems, setSelectedItems] = useState(data?.quantity || 1);
