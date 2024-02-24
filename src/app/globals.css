@@ -110,6 +110,10 @@
   margin-right: auto;
 }
 
+.mt-\[7\%\] {
+  margin-top: 7%;
+}
+
 .cmt-5 {
   math-depth: 20px;
 }
@@ -134,6 +138,18 @@
 
 .pt-24 {
   padding-top: 96px;
+}
+
+.pr-3 {
+  padding-right: 0.75rem
+    /* 12px */
+  ;
+}
+
+.pl-1 {
+  padding-left: 0.25rem
+    /* 4px */
+  ;
 }
 
 .p-8 {
@@ -234,6 +250,23 @@
   cursor: pointer;
 }
 
+.overflow-y-scroll {
+  overflow-y: scroll;
+}
+
+.group:hover .group-hover\:block {
+  display: block;
+}
+
+.space-y-2> :not([hidden])~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.5rem
+      /* 8px */
+      * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.5rem
+      /* 8px */
+      * var(--tw-space-y-reverse));
+}
 
 
 /* 
