@@ -84,7 +84,7 @@ const QuickAddToCartModal = ({ singleProduct, QuickShop, SetQuickShop }) => {
   };
 
   return (
-    <div className="relative flex justify-center pt-10 items-center w-[300px] w-300px h-full bg-white bg-opacity-80">
+    <div className="relative flex justify-center pt-10 items-center w-[300px] h-[420px] w-300px h-420px bg-white bg-opacity-80">
       <div>
         <RxCross2
           onClick={() => {

@@ -44,7 +44,7 @@ const NavBar = () => {
                 type?.map((t) => (
                   <li key={t?._id} className="relative group">
                     <Link href={`/Collections${t?.url}`}>{t?.title}</Link>
-                    <ul className="bg-[#31a3a3] z-40 absolute hidden mt-0 space-y-2 py-2 pl-1 pr-3 rounded group-hover:block">
+                    <ul className=" bg-my-primary z-40 absolute hidden mt-0 space-y-2 py-2 pl-1 pr-3 rounded group-hover:block">
                       {t?.collections?.map((c, index) => (
                         <li key={index} className="hover:text-pink-500 cursor-pointer flex items-center gap-1">
                           <IoIosArrowForward /> <Link href={`/Collections/${c.toLowerCase()}`}>{c}</Link>

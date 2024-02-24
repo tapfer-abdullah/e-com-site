@@ -89,7 +89,7 @@ const ShoppingCart = ({ positionInfo, setPositionInfo }) => {
           onClick={() => {
             setPositionInfo({ right: "minusRight", customOpacity: 0 });
           }}
-          className="absolute top-7 right-3 text-2xl font-semibold cursor-pointer"
+          className="absolute top-5 right-3 text-2xl font-semibold cursor-pointer"
         />
         <p className="absolute top-3 left-3 text-4xl font-light cursor-pointer">Cart</p>
 
