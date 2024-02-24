@@ -9,7 +9,8 @@ import { OrderStateProvider } from "../State/OrderState";
 import "./Nav.css";
 
 const NavBar = () => {
-  const [positionInfo, setPositionInfo] = useState({ right: "-right-[2000px]", customOpacity: 0 });
+  // const [positionInfo, setPositionInfo] = useState({ right: "-right-[2000px]", customOpacity: 0 });
+  const [positionInfo, setPositionInfo] = useState({ right: "minusRight", customOpacity: 0 });
   const [type, setType] = useState([]);
   const [navLinks, setNavLinks] = useState([]);
 
@@ -31,7 +32,7 @@ const NavBar = () => {
     <div>
       <div className="mobile">mobile</div>
       <div className="big-screen">
-        <div className="!w-screen bg-[#31a3a3] text-white font-sans font-semibold flex justify-around py-4 text-xl">
+        <div className="nav-content text-white font-sans font-semibold text-xl">
           <Link href="/" className="text-3xl font-semibold uppercase">
             OdbhootStore
           </Link>
@@ -71,7 +72,7 @@ const NavBar = () => {
               <span className="absolute -top-3 -right-3 bg-red-500 rounded-full py-[2px] px-[8px] text-sm">{cartData?.length || 0}</span>
               <AiOutlineShopping
                 onClick={() => {
-                  setPositionInfo({ right: "right-0", customOpacity: 70 });
+                  setPositionInfo({ right: "zeroRight", customOpacity: 70 });
                 }}
                 className="text-3xl"
               />

@@ -18,7 +18,7 @@ const Footer = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="px-10 xl:px-5 flex flex-col xl:flex-row justify-between gap-6 pt-10 pb-2">
+      <div className="footerMainDiv px-10 xl:px-5 flex flex-col xl:flex-row justify-between gap-6 pt-10 pb-2">
         <div className="flex flex-col space-y-2 w-1/4">
           <h4 className="text-lg font-semibold">Quick Links</h4>
           {footerLinks.length > 0 &&

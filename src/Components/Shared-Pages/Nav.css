@@ -6,6 +6,25 @@
     display: none;
 }
 
+.nav-content {
+    width: 100vw;
+    background-color: #31a3a3;
+    display: flex;
+    justify-content: space-around;
+    padding: 16px 0;
+}
+
+.footerMainDiv {
+    /* px-10 xl:px-5 flex flex-col xl:flex-row justify-between gap-6 pt-10 pb-2 */
+    padding: 40px;
+    padding-bottom: 8px;
+}
+
+.footerMainDiv>div {
+    width: 100%;
+    /* padding: 0px 20px; */
+}
+
 @media only screen and (min-width: 992px) {
     .mobile {
         display: none;
@@ -18,5 +37,17 @@
         left: 0;
         z-index: 5;
         width: 10vw;
+    }
+
+    .footerMainDiv {
+        padding: 40px 20px 8px 20px;
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+    }
+
+    .footerMainDiv>div {
+        width: 25%;
+        /* padding: 0px 20px; */
     }
 }

@@ -94,8 +94,11 @@ const ShoppingCart = ({ positionInfo, setPositionInfo }) => {
       <div className={`shoppingCartContent ${positionInfo?.right} w-[28%] h-full bg-white shadow-lg opacity-100 py-10 pr-5 pl-7 transition-all duration-500`}>
         <RxCross2
           onClick={() => {
-            setPositionInfo({ right: "-right-[2000px]", customOpacity: 0 });
+            setPositionInfo({ right: "minusRight", customOpacity: 0 });
           }}
+          // onClick={() => {
+          //   setPositionInfo({ right: "-right-[2000px]", customOpacity: 0 });
+          // }}
           className="absolute top-7 right-3 text-2xl font-semibold cursor-pointer"
         />
         <p className="absolute top-3 left-3 text-4xl font-light cursor-pointer">Cart</p>
@@ -141,7 +144,7 @@ const ShoppingCart = ({ positionInfo, setPositionInfo }) => {
             </form>
             <Link
               onClick={() => {
-                setPositionInfo({ right: "-right-[2000px]", customOpacity: 0 });
+                setPositionInfo({ right: "minusRight", customOpacity: 0 });
               }}
               href={"/checkout"}
               type="submit"
