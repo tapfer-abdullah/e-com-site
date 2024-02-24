@@ -91,7 +91,7 @@ const ShoppingCart = ({ positionInfo, setPositionInfo }) => {
       className={`shoppingCartOverlay ${positionInfo?.right} bg-[#f5f5f5] bg-opacity-70 transition-all duration-500`}
     >
       {/* <div className={`shoppingCartContent absolute z-40 ${positionInfo?.right} w-[28%] h-full bg-white shadow-lg opacity-100 py-10 pr-5 pl-7 transition-all duration-500`}> */}
-      <div className={`shoppingCartContent ${positionInfo?.right} w-[28%] h-full bg-white shadow-lg opacity-100 py-10 pr-5 pl-7 transition-all duration-500`}>
+      <div className={`shoppingCartContent ${positionInfo?.right} bg-white shadow-lg opacity-100 py-10 pr-5 pl-7 transition-all duration-500`}>
         <RxCross2
           onClick={() => {
             setPositionInfo({ right: "minusRight", customOpacity: 0 });

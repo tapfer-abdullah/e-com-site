@@ -88,6 +88,8 @@ body .show-modal {
 .shoppingCartContent {
     position: absolute;
     z-index: 4;
+    width: 28%;
+    height: 100%;
 }
 
 .minusRight {
