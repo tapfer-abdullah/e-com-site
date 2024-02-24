@@ -21,9 +21,9 @@ const DetailsModalImage = ({ singleProduct, rightSlider, leftSlider, imgIndex, s
             />
           </div>
           <div>
-            <img src={imageData?.[imgIndex]?.imageUrl} alt="img" className="!max-h-[50vh] !w-full" />
+            <img src={imageData?.[imgIndex]?.imageUrl} alt="img" className="!max-h-[50vh] w-full max-h-50vh" />
           </div>
-          <div className="absolute right-2 top-[50%]">
+          <div className="absolute right-2 top-[50%] top-50ps">
             <IoIosArrowDropright
               className={`${imageData?.length < 2 ? "hidden" : ""} text-white font-semibold text-4xl cursor-pointer hover:text-black hover:bg-white rounded-full transition-all duration-300`}
               onClick={rightSlider}

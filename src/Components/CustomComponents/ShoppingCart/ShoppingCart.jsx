@@ -83,32 +83,22 @@ const ShoppingCart = ({ positionInfo, setPositionInfo }) => {
   };
 
   return (
-    <div
-      // onClick={() => {
-      //   setPositionInfo({ right: "-right-[2000px]", customOpacity: 0 });
-      // }}
-      // className={`shoppingCartOverlay fixed z-30 top-16 ${positionInfo?.right} w-screen h-screen bg-[#f5f5f5] bg-opacity-70 transition-all duration-500`}
-      className={`shoppingCartOverlay ${positionInfo?.right} bg-[#f5f5f5] bg-opacity-70 transition-all duration-500`}
-    >
-      {/* <div className={`shoppingCartContent absolute z-40 ${positionInfo?.right} w-[28%] h-full bg-white shadow-lg opacity-100 py-10 pr-5 pl-7 transition-all duration-500`}> */}
+    <div className={`shoppingCartOverlay ${positionInfo?.right} bg-[#f5f5f5] bg-opacity-70 transition-all duration-500`}>
       <div className={`shoppingCartContent ${positionInfo?.right} bg-white shadow-lg opacity-100 py-10 pr-5 pl-7 transition-all duration-500`}>
         <RxCross2
           onClick={() => {
             setPositionInfo({ right: "minusRight", customOpacity: 0 });
           }}
-          // onClick={() => {
-          //   setPositionInfo({ right: "-right-[2000px]", customOpacity: 0 });
-          // }}
           className="absolute top-7 right-3 text-2xl font-semibold cursor-pointer"
         />
         <p className="absolute top-3 left-3 text-4xl font-light cursor-pointer">Cart</p>
 
         <div className="pt-12 relative h-full">
           {/* cart items  */}
-          <div className="h-1/2 overflow-y-scroll">
+          <div className="h-1/2 h-1b2 overflow-y-scroll">
             {cartData?.length == 0 && (
               <div className="flex flex-col items-center justify-center">
-                <img className="w-3/4" src="https://i.ibb.co/Nmm2QxV/empty-cart.png" alt="cart-empty" />
+                <img className="w-3/4 w-3b4" src="https://i.ibb.co/Nmm2QxV/empty-cart.png" alt="cart-empty" />
                 <p className="text-red-600">Cart is empty!</p>
               </div>
             )}
