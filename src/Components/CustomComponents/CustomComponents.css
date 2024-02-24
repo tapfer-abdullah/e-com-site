@@ -89,7 +89,7 @@ body .show-modal {
     position: absolute;
     z-index: 4;
     width: 28%;
-    height: 100%;
+    height: 100vh;
 }
 
 .minusRight {
