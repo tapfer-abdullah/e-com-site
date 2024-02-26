@@ -133,7 +133,7 @@ const ProductDetailsModal = ({ singleProduct, handleClose }) => {
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-green-500">In Stock</span>
+          {singleProduct?.status?.label == "Active" ? <span className={"text-green-500"}>{singleProduct?.status?.label}</span> : <span className="text-red-500">Stock out</span>}
           <span>Type: {singleProduct?.type ? singleProduct?.type[0]?.label : ""}</span>
           <span>SKU: {selectedSKU || singleProduct?.colors?.[0]?.allSKU?.[0]?.sku}</span>
         </div>
@@ -218,7 +218,11 @@ const ProductDetailsModal = ({ singleProduct, handleClose }) => {
               </button>
             </div>
             <div className="flex-grow">
-              <button onClick={() => handleAddToCart(singleProduct?._id)} className="py-2 px-5 bg-black text-white mx-[1px] uppercase w-full">
+              <button
+                disabled={singleProduct?.status?.label !== "Active"}
+                onClick={() => handleAddToCart(singleProduct?._id)}
+                className={`py-2 px-5 bg-black text-white mx-[1px] uppercase w-full ${singleProduct?.status?.label !== "Active" ? "opacity-50" : "opacity-100"}`}
+              >
                 Add to Cart
               </button>
             </div>

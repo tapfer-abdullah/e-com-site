@@ -13,35 +13,90 @@ export const GET = async (request) => {
 
     const searchParams = new URLSearchParams(query);
     const status = searchParams.get('status');
+    const priceLevel = searchParams.get('priceLevel');
+    const highestSelling = searchParams.get('highestSelling');
+    const time = searchParams.get('time');
     const category = searchParams.get('category');
     const title = searchParams.get('title');
 
+    const sortOrder = priceLevel === 'asc' ? 1 : -1;
+    let allProducts = [];
+
+    // console.log({ time, highestSelling, priceLevel, status, category });
+
     try {
         if (title == "yes") {
-            const allProducts = await Products.find().select({ title: 1, _id: 1, imageUrl: 1 });
-            return NextResponse.json(allProducts);
+            allProducts = await Products.find().select({ title: 1, _id: 1, imageUrl: 1 });
+
         }
         else if (status == null && category == null) {
-            const allProducts = await Products.find().select("-description");
-            return NextResponse.json(allProducts);
+            allProducts = await Products.find().select("-description");
+
         }
         else if (status == "All") {
-            const allProducts = await Products.find({ 'category.label': { $regex: new RegExp(category, 'i') } }).select("-description");
-            return NextResponse.json(allProducts);
+            allProducts = await Products.find({ 'category.label': { $regex: new RegExp(`^${category}$`, 'i') } }).select("-description");
+
         }
-        else if (status && category) {
-            const allProducts = await Products.find({
+        else if (highestSelling == 'true' && priceLevel) {
+            allProducts = await Products.find({
                 $and: [
                     {
-                        'category.label': { $regex: new RegExp(category, 'i') }
+                        'category.label': { $regex: new RegExp(`^${category}$`, 'i') }
                     },
                     {
-                        'status.label': { $regex: new RegExp(status, 'i') }
+                        'status.label': { $regex: new RegExp(`^${status}$`, 'i') }
+                    }
+                ]
+            }).select("-description").sort({ price: sortOrder, sellQuantity: -1 });
+
+        }
+        else if (priceLevel) {
+            allProducts = await Products.find({
+                $and: [
+                    {
+                        'category.label': { $regex: new RegExp(`^${category}$`, 'i') }
+                    },
+                    {
+                        'status.label': { $regex: new RegExp(`^${status}$`, 'i') }
+                    }
+                ]
+            }).select("-description").sort({ price: sortOrder });
+
+        }
+        else if (highestSelling == 'true') {
+            allProducts = await Products.find({
+                $and: [
+                    {
+                        'category.label': { $regex: new RegExp(`^${category}$`, 'i') }
+                    },
+                    {
+                        'status.label': { $regex: new RegExp(`^${status}$`, 'i') }
+                    }
+                ]
+            }).select("-description").sort({ sellQuantity: -1 });
+
+        }
+        else if (status && category) {
+            allProducts = await Products.find({
+                $and: [
+                    {
+                        'category.label': { $regex: new RegExp(`^${category}$`, 'i') }
+                    },
+                    {
+                        'status.label': { $regex: new RegExp(`^${status}$`, 'i') }
                     }
                 ]
             }).select("-description");
-            return NextResponse.json(allProducts);
 
+
+        }
+
+        if (time == "-1") {
+            const reverseProductArray = allProducts.reverse();
+            return NextResponse.json(reverseProductArray);
+        }
+        else {
+            return NextResponse.json(allProducts);
         }
 
     }

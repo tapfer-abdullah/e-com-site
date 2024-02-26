@@ -84,7 +84,7 @@ const IDWiseDetails = ({ singleProduct, selectedSKU, imgIndex, setImgIndex, hand
           <h3 className="text-xl font-semibold">{title}</h3>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-green-500">In Stock</span>
+          {singleProduct?.status?.label == "Active" ? <span className={"text-green-500"}>{singleProduct?.status?.label}</span> : <span className="text-red-500">Stock out</span>}
           <span>Type: {singleProduct?.type ? singleProduct?.type[0]?.label : ""}</span>
           <span>SKU: {selectedSKU || singleProduct?.colors?.[0]?.allSKU?.[0]?.sku}</span>
         </div>
@@ -172,8 +172,11 @@ const IDWiseDetails = ({ singleProduct, selectedSKU, imgIndex, setImgIndex, hand
             </div>
             <div className="flex-grow">
               <button
+                disabled={singleProduct?.status?.label !== "Active"}
                 onClick={() => handleAddToCart(singleProduct?._id)}
-                className="py-2 px-5 bg-black text-white hover:bg-[#363634] transition-all duration-300 hover:shadow-lg mx-[1px] uppercase w-full"
+                className={`py-2 px-5 bg-black text-white hover:bg-[#363634] transition-all duration-300 hover:shadow-lg mx-[1px] uppercase w-full ${
+                  singleProduct?.status?.label !== "Active" ? "opacity-50" : "opacity-100"
+                }`}
               >
                 Add to Cart
               </button>

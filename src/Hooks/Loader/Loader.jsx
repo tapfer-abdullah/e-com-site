@@ -4,7 +4,7 @@ import dot from "../../../public/lottie/dot_loading.json";
 import zero from "../../../public/lottie/zero_loading.json";
 import "./Loader.css";
 
-const Loader = () => {
+const Loader = ({ style }) => {
   const dotOptions = {
     animationData: dot,
     loop: true,
@@ -20,7 +20,7 @@ const Loader = () => {
   const { View: ZeroView2 } = useLottie(zeroOptions);
 
   return (
-    <div className="flex justify-center">
+    <div className={`flex justify-center ${style}`}>
       <div className="flex justify-center items-center text-xl space-x-1 font-semibold">
         <span className="loader-text">ODBH</span>
         <span className="zero-span">{ZeroView || "O"}</span>

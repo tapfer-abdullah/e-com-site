@@ -33,6 +33,12 @@ const ProductCard1 = ({ singleProduct }) => {
 
       <div className="product-card m-2 space-y-3">
         <div className="Image-cart overflow-hidden relative">
+          {singleProduct?.status?.label !== "Active" && (
+            <div className="absolute top-1 right-1 z-[3] text-lg font-semibold text-white">
+              <p className="bg-black bg-opacity-60 py-1 px-3">Sold Out</p>
+            </div>
+          )}
+
           <Link href={`/Collections/${category[0]?.label.toLowerCase()}/${_id}`} className="image-container transition-all">
             <img src={imageUrl[0]} alt="Product Image1" className="default-image transition-all duration-300" />
             <img src={imageUrl[1]} alt="Product Image2" className="hover-image transition-all duration-700" />

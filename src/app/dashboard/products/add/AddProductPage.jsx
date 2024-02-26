@@ -43,6 +43,7 @@ const colors = [
 const status = [
   { value: "Active", label: "Active" },
   { value: "Draft", label: "Draft" },
+  { value: "OutOfStock", label: "OutOfStock" },
 ];
 
 const AddProductPage = () => {
@@ -56,7 +57,7 @@ const AddProductPage = () => {
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [img1, setImg1] = useState("https://i.ibb.co/KFjt6Mg/gallery-img.png");
   const [img2, setImg2] = useState("https://i.ibb.co/KFjt6Mg/gallery-img.png");
-  const [selectedStatus, setSelectedStatus] = useState({});
+  const [selectedStatus, setSelectedStatus] = useState({ value: "draft", label: "Select status.." });
   const [images, setImages] = useState([]);
   const [imageURL, setImageURL] = useState([]);
   const [category, setCategory] = useState([]);
@@ -351,7 +352,7 @@ const AddProductPage = () => {
                   isMulti={false}
                   isClearable={false}
                   placeholder="Select status"
-                  className="z-20"
+                  className="!z-40"
                 />
               </div>
             </div>
