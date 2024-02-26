@@ -203,7 +203,7 @@ const CollectionIdPage = () => {
         </div>
 
         {/* products container */}
-        <div className="relative lg:col-span-3 lg:grid lg:grid-cols-3 gap-4 mx-auto">
+        <div className="relative lg:col-span-3 lg:grid lg:grid-cols-3 gap-4 mx-auto" style={{ height: "fit-content" }}>
           {isLoading && !isLoading2 && (
             <div className="col-span-3 absolute top-5 left-1/2 right-1/2 z-[7]">
               <Loader style={"bg-white"} />
@@ -220,7 +220,6 @@ const CollectionIdPage = () => {
           {allProductsData?.slice((page - 1) * productPerPage, (page - 1) * productPerPage + productPerPage).map((singleProduct) => (
             <ProductCard1 key={singleProduct?._id} singleProduct={singleProduct}></ProductCard1>
           ))}
-
           {allProductsData?.length > 0 && (
             <div className="col-span-3 flex flex-col justify-center items-center">
               <Pagination count={totalPage} color="primary" page={page} onChange={handleChange} />

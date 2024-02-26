@@ -22,7 +22,7 @@ const ProductCard1 = ({ singleProduct }) => {
   const handleClose = () => setOpen(false);
 
   return (
-    <div>
+    <div style={{ height: "fit-content" }}>
       <div>
         <Modal className=" relative" open={open} onClose={handleClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
           <Box sx={{ border: "none" }} className="bg-transparent w-2/3 w-2b3 cmt-5 mx-auto p-0">

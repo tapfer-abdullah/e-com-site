@@ -91,7 +91,7 @@ export const GET = async (request) => {
 
         }
 
-        if (time == "-1") {
+        if (highestSelling !== 'true' && !priceLevel && time == "-1") {
             const reverseProductArray = allProducts.reverse();
             return NextResponse.json(reverseProductArray);
         }
