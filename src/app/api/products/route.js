@@ -23,6 +23,7 @@ export const GET = async (request) => {
     let allProducts = [];
 
     // console.log({ time, highestSelling, priceLevel, status, category });
+    // console.log({ category, status })
 
     try {
         if (title == "yes") {

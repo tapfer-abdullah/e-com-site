@@ -85,6 +85,11 @@ const DashboardSidebar = () => {
                   Pages
                 </Link>
               </li>
+              <li>
+                <Link href="/dashboard/theme/home-page" className="">
+                  Home Page
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
