@@ -42,7 +42,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
   // };
 
   return (
-    <form className="px-8 overflow-y-scroll max-h-[100vh] no-scrollbar">
+    <div className="px-8 overflow-y-scroll max-h-[100vh] no-scrollbar">
       {/* <form className="px-8 "> */}
       <div className="space-y-2">
         <div className="flex justify-between items-center my-2">
@@ -163,7 +163,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
         </div>
       </div>
       <button className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">Pay Now</button>
-    </form>
+    </div>
   );
 };
 

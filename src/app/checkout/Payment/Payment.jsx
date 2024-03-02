@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
+import { axiosHttp } from "@/app/helper/axiosHttp";
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import MuiAccordion from "@mui/material/Accordion";
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
@@ -41,9 +42,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: "1px solid rgba(0, 0, 0, .125)",
 }));
 
-// Make sure to call `loadStripe` outside of a component’s render to avoid
-// recreating the `Stripe` object on every render.
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 const ELEMENTS_OPTIONS = {
   fonts: [
@@ -61,6 +60,26 @@ export default function Payment() {
   };
 
   const [cardType, setCardType] = useState(null);
+  const [clientSecret, setClientSecret] = React.useState("");
+
+  React.useEffect(() => {
+    // Create PaymentIntent as soon as the page loads
+    axiosHttp.post("/payment/stripe-payment-intent", { items: [{ id: "xl-tshirt" }] }).then((data) => {
+      // console.log(data);
+      // console.log(data.data.clientSecret);
+      setClientSecret(data.data.clientSecret);
+    });
+  }, []);
+
+  const appearance = {
+    theme: "stripe",
+  };
+  const options = {
+    clientSecret,
+    appearance,
+  };
+
+  // console.log({ clientSecret });
 
   return (
     <div>
@@ -101,10 +120,20 @@ export default function Payment() {
         </AccordionSummary>
         <AccordionDetails>
           <div className="AppWrapper">
-            <Elements stripe={stripePromise} options={ELEMENTS_OPTIONS}>
-              {/* calling checkout form */}
+            {clientSecret && (
+              <Elements options={options} stripe={stripePromise}>
+                <CheckoutForm clientSecret={clientSecret} data={{ cardType, setCardType }} />
+              </Elements>
+            )}
+
+            {/* <Elements options={options} stripe={stripePromise}>
               <CheckoutForm data={{ cardType, setCardType }} />
-            </Elements>
+            </Elements> */}
+
+            {/* <Elements stripe={stripePromise} options={ELEMENTS_OPTIONS}>
+              
+              <CheckoutForm data={{ cardType, setCardType }} />
+            </Elements> */}
           </div>
         </AccordionDetails>
       </Accordion>
