@@ -15,6 +15,10 @@ import { MdErrorOutline } from "react-icons/md";
 import CheckoutForm from "./CheckoutForm";
 import "./commonCss.css";
 
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import { PayPalButtons } from "@paypal/react-paypal-js";
+
 const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} square {...props} />)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   //   borderTopRightRadius: "5px",
@@ -26,11 +30,37 @@ const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} s
   },
 }));
 
-const AccordionSummary = styled((props) => <MuiAccordionSummary expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.9rem" }} />} {...props} />)(({ theme }) => ({
-  //   backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, .05)" : "rgba(0, 0, 0, .03)",
+// const AccordionSummary = styled((props) => (
+//   <MuiAccordionSummary expandIcon={<RadioButtonCheckedIcon sx={{ fontSize: "0.9rem" }} />}
+//   CollapseIcon={<RadioButtonUncheckedIcon sx={{ fontSize: "0.9rem" }} />} {...props} />
+// ))(({ theme }) => ({
+//   //   backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, .05" : "rgba(0, 0, 0, .03)",
+//   flexDirection: "row-reverse",
+//   "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
+//     transform: "rotate(90deg)",
+//   },
+//   "& .MuiAccordionSummary-content": {
+//     marginLeft: theme.spacing(1),
+//   },
+// }));
+
+const AccordionSummary = styled((props) => {
+  const { children, expandIcon, collapseIcon, ...other } = props;
+  const isExpanded = props["aria-expanded"];
+
+  return (
+    <MuiAccordionSummary className="relative" {...other}>
+      {children}
+    </MuiAccordionSummary>
+  );
+})(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, .05)" : "rgba(0, 0, 0, .03)",
   flexDirection: "row-reverse",
   "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
     transform: "rotate(90deg)",
+    "& > *": {
+      display: "none", // Hide the default icon when custom icon is used
+    },
   },
   "& .MuiAccordionSummary-content": {
     marginLeft: theme.spacing(1),
@@ -53,7 +83,7 @@ const ELEMENTS_OPTIONS = {
 };
 
 export default function Payment() {
-  const [expanded, setExpanded] = React.useState("panel1");
+  const [expanded, setExpanded] = React.useState("panel2");
 
   const handleChange = (panel) => (event, newExpanded) => {
     setExpanded(newExpanded ? panel : false);
@@ -63,13 +93,12 @@ export default function Payment() {
   const [clientSecret, setClientSecret] = React.useState("");
 
   React.useEffect(() => {
-    // Create PaymentIntent as soon as the page loads
-    axiosHttp.post("/payment/stripe-payment-intent", { items: [{ id: "xl-tshirt" }] }).then((data) => {
-      // console.log(data);
-      // console.log(data.data.clientSecret);
-      setClientSecret(data.data.clientSecret);
-    });
-  }, []);
+    if (expanded == "panel1") {
+      axiosHttp.post("/payment/stripe-payment-intent", { items: [{ id: "xl-tshirt" }] }).then((data) => {
+        setClientSecret(data.data.clientSecret);
+      });
+    }
+  }, [expanded]);
 
   const appearance = {
     theme: "stripe",
@@ -81,8 +110,28 @@ export default function Payment() {
 
   // console.log({ clientSecret });
 
+  const createOrder = (data, actions) => {
+    return actions.order.create({
+      purchase_units: [
+        {
+          amount: {
+            value: "1.00", // Update with your actual amount
+          },
+        },
+      ],
+      application_context: {
+        shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
+        user_action: "PAY_NOW", // Use this to hide Pay Later option
+      },
+    });
+  };
+
+  const onApprove = (data, actions) => {
+    return actions.order.capture();
+  };
+
   return (
-    <div>
+    <div className=" mb-5">
       <h4 className="text-xl font-semibold mt-7 mb-1 ">Payment</h4>
       <p className="mb-2">All transactions are secure and encrypted.</p>
       <div className="flex justify-start items-center px-2 py-3 gap-2 mb-4 bg-red-50 rounded-md">
@@ -92,7 +141,14 @@ export default function Payment() {
       <Accordion expanded={expanded === "panel1"} onChange={handleChange("panel1")} className="!bg-[#f5f5f5]">
         <AccordionSummary className="!bg-[white]" aria-controls="panel1d-content" id="panel1d-header">
           <div className="w-full flex justify-between items-center">
-            <Typography className="font-semibold">Credit card</Typography>
+            <Typography className="font-semibold">
+              {expanded === "panel1" ? (
+                <RadioButtonCheckedIcon sx={{ fontSize: "1rem" }} className="text-blue-500 mr-1" />
+              ) : (
+                <RadioButtonUncheckedIcon sx={{ fontSize: "1rem" }} className="text-blue-500 mr-1" />
+              )}
+              Credit card
+            </Typography>
             {cardType ? (
               <>
                 <div className="flex items-center gap-1">
@@ -140,7 +196,14 @@ export default function Payment() {
       <Accordion expanded={expanded === "panel2"} onChange={handleChange("panel2")} className="!bg-[#f5f5f5]">
         <AccordionSummary className="!bg-[white]" aria-controls="panel2d-content" id="panel2d-header">
           <div className="w-full flex justify-between items-center">
-            <Typography className="font-semibold">PayPal</Typography>
+            <Typography className="font-semibold">
+              {expanded === "panel2" ? (
+                <RadioButtonCheckedIcon sx={{ fontSize: "1rem" }} className="text-blue-500 mr-1" />
+              ) : (
+                <RadioButtonUncheckedIcon sx={{ fontSize: "1rem" }} className="text-blue-500 mr-1" />
+              )}
+              PayPal
+            </Typography>
             <img src={"https://i.ibb.co/smfbCX7/paypal.png"} alt="PayPal Icon" className="w-20 px-[2px] py-[1px] bg-white " />
           </div>
         </AccordionSummary>
@@ -148,6 +211,24 @@ export default function Payment() {
           <Typography className="px-3 text-center">After clicking "Pay with PayPal", you will be redirected to PayPal to complete your purchase securely.</Typography>
         </AccordionDetails>
       </Accordion>
+      {expanded === "panel2" && (
+        // <button id="submit" className="text-xl text-white p-2 my-5 w-full bg-[#0070ba] rounded-md hover:bg-opacity-70 transition-all duration-300">
+        //   Pay with <span className="font-bold italic">PayPal</span>
+        // </button>
+        <div className="my-5">
+          <PayPalButtons
+            style={{
+              color: "blue",
+              layout: "horizontal",
+              label: "pay",
+              height: 40,
+              tagline: false,
+            }}
+            createOrder={createOrder}
+            onApprove={onApprove}
+          />
+        </div>
+      )}
     </div>
   );
 }

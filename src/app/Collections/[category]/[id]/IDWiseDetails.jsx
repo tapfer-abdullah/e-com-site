@@ -1,5 +1,6 @@
 import { OrderStateProvider } from "@/Components/State/OrderState";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 import Link from "next/link";
 import React, { useContext, useState } from "react";
 import { MdOutlineEuroSymbol } from "react-icons/md";
@@ -72,6 +73,26 @@ const IDWiseDetails = ({ singleProduct, selectedSKU, imgIndex, setImgIndex, hand
     }
 
     setChangeCartData(changeCartData + 1);
+  };
+
+  const createOrder = (data, actions) => {
+    return actions.order.create({
+      purchase_units: [
+        {
+          amount: {
+            value: "1.00", // Update with your actual amount
+          },
+        },
+      ],
+      application_context: {
+        shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
+        user_action: "PAY_NOW", // Use this to hide Pay Later option
+      },
+    });
+  };
+
+  const onApprove = (data, actions) => {
+    return actions.order.capture();
   };
 
   return (
@@ -184,10 +205,25 @@ const IDWiseDetails = ({ singleProduct, selectedSKU, imgIndex, setImgIndex, hand
           </div>
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Link href={"/checkout"} className="block text-center py-2 px-5 bg-[#FFC520] hover:bg-[#ffd558] transition-all duration-300 hover:shadow-md text-black mx-[1px] w-full font-bold uppercase">
             Checkout
           </Link>
+        </div> */}
+        <div>
+          {/* <PayPalButtons style={{ color: "blue", layout: "horizontal", label: "pay" }} /> */}
+          {/* <PayPalButtons style={{ color: "blue", layout: "horizontal", label: "pay" }} createOrder={createOrder} onApprove={onApprove} /> */}
+          <PayPalButtons
+            style={{
+              color: "gold",
+              layout: "horizontal",
+              label: "checkout",
+              height: 40,
+              tagline: false,
+            }}
+            createOrder={createOrder}
+            onApprove={onApprove}
+          />
         </div>
       </div>
     </div>

@@ -117,8 +117,6 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
         <p>Free</p>
       </div>
 
-      <Payment />
-
       <h4 className="text-xl font-semibold mt-7 mb-2 ">Add tip</h4>
       <div className="border border-[#d0d0d0] rounded-md ">
         <p className="p-3 border-b border-[#d0d0d0]">Show your support for the team at ODBHOOTSTORE</p>
@@ -162,7 +160,10 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
           <p>Thank you, we appreciate it.</p>
         </div>
       </div>
-      <button className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">Pay Now</button>
+
+      {/* Payment options */}
+      <Payment />
+      {/* <button className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">Pay Now</button> */}
     </div>
   );
 };
