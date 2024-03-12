@@ -49,9 +49,7 @@ const Products = () => {
         <TabContext value={value}>
           <div className="flex justify-center -mt-6">
             <TabList onChange={handleChange} variant="scrollable" scrollButtons allowScrollButtonsMobile aria-label="scrollable force tabs example">
-              {category?.map((sc, index) => (
-                <Tab key={index} label={sc?.title} value={index} />
-              ))}
+              {category?.length > 0 && category?.map((sc, index) => <Tab key={index} label={sc?.title} value={index} />)}
             </TabList>
           </div>
           {isLoading && <Loader className="my-10" />}
@@ -61,28 +59,29 @@ const Products = () => {
               <p className="text-red-600 font-semibold">No product found in this category</p>
             </div>
           )}
-          {category?.map((sc, index) => (
-            <TabPanel key={index} value={index}>
-              <Swiper
-                navigation={true}
-                slidesPerView={4}
-                spaceBetween={30}
-                freeMode={true}
-                pagination={{
-                  clickable: true,
-                }}
-                modules={[FreeMode, Pagination, Navigation]}
-                className="mySwiper"
-              >
-                {allProductsData.length > 0 &&
-                  allProductsData?.map((singleProduct) => (
-                    <SwiperSlide key={singleProduct?._id}>
-                      <ProductCard1 singleProduct={singleProduct}></ProductCard1>
-                    </SwiperSlide>
-                  ))}
-              </Swiper>
-            </TabPanel>
-          ))}
+          {category?.length > 0 &&
+            category?.map((sc, index) => (
+              <TabPanel key={index} value={index}>
+                <Swiper
+                  navigation={true}
+                  slidesPerView={4}
+                  spaceBetween={30}
+                  freeMode={true}
+                  pagination={{
+                    clickable: true,
+                  }}
+                  modules={[FreeMode, Pagination, Navigation]}
+                  className="mySwiper"
+                >
+                  {allProductsData.length > 0 &&
+                    allProductsData?.map((singleProduct) => (
+                      <SwiperSlide key={singleProduct?._id}>
+                        <ProductCard1 singleProduct={singleProduct}></ProductCard1>
+                      </SwiperSlide>
+                    ))}
+                </Swiper>
+              </TabPanel>
+            ))}
         </TabContext>
       </div>
     </>

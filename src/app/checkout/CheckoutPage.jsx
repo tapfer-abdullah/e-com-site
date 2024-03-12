@@ -42,14 +42,30 @@ const CheckoutPage = () => {
   const [discountInput, setDiscountInput] = useState("");
   const [isLoading, setLoading] = useState(false);
 
-  // customer info..................
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [email, setEmail] = useState("");
-
   const [shipping, setShipping] = useState("");
   const [shippingAmount, setShippingAmount] = useState(10);
   const [shippingReqAmount, setShippingReqAmount] = useState(0);
 
+  // customer info..................
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [email, setEmail] = useState("");
+  const [cusInfo, setCusInfo] = useState({
+    firstName: "",
+    lastName: "",
+    address: "",
+    apartment: "",
+    postalCode: "",
+    city: "",
+    phoneNumber: "",
+    email: "",
+    country: null,
+    discountCode,
+    shipping: shippingAmount,
+    tips: tip,
+  });
+
+  // console.log({ cusInfo, discountCode });
+  // console.log(selectedCountry);
   // console.log({ email, selectedCountry, shipping, shippingAmount, minusAmount });
 
   const [open, setOpen] = useState(false);
@@ -438,6 +454,24 @@ const CheckoutPage = () => {
     }
   }, [promoCode]);
 
+  // abandoned order
+  useEffect(() => {
+    function isValidEmail(email) {
+      const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$/;
+      return emailPattern.test(email);
+    }
+
+    // console.log(email);
+    // console.log(isValidEmail(email));
+
+    if (isValidEmail(cusInfo?.email)) {
+      cusInfo.discountCode = discountCode;
+      axiosHttp.post("/checkout/abandoned", { cusInfo, cart: dataForBxGy, discountCode }).then((res) => {
+        // console.log(res.data);
+      });
+    }
+  }, [cusInfo, dataForBxGy, discountCode]);
+
   return (
     <>
       <div>
@@ -479,7 +513,16 @@ const CheckoutPage = () => {
 
       <div className="grid grid-cols-12 mx-auto mt-20">
         <div className="col-start-2 col-span-10 grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <CheckoutPersonalInfo setTips={setTip} subTotal={subTotal} email={email} setEmail={setEmail} selectedCountry={selectedCountry} setSelectedCountry={setSelectedCountry} />
+          <CheckoutPersonalInfo
+            cusInfo={cusInfo}
+            setCusInfo={setCusInfo}
+            setTips={setTip}
+            subTotal={subTotal}
+            email={email}
+            setEmail={setEmail}
+            selectedCountry={selectedCountry}
+            setSelectedCountry={setSelectedCountry}
+          />
           <CheckoutProductsInfo
             email={email}
             selectedCountry={selectedCountry}

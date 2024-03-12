@@ -1,7 +1,9 @@
+"use client";
+import { axiosHttp } from "@/app/helper/axiosHttp";
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import React from "react";
 
-export default function CheckoutForm() {
+export default function CheckoutForm({ cusInfo }) {
   const stripe = useStripe();
   const elements = useElements();
 
@@ -15,7 +17,7 @@ export default function CheckoutForm() {
 
     const clientSecret = new URLSearchParams(window.location.search).get("payment_intent_client_secret");
 
-    // console.log({ clientSecret });
+    console.log({ clientSecret });
 
     if (!clientSecret) {
       return;
@@ -27,6 +29,9 @@ export default function CheckoutForm() {
           {
             console.log({ success: paymentIntent });
             setMessage("Payment succeeded!");
+            axiosHttp.post("/users/customer", dataForBxGy).then((res) => {
+              console.log(res?.data);
+            });
           }
           break;
         case "processing":
@@ -52,25 +57,12 @@ export default function CheckoutForm() {
     }
 
     setIsLoading(true);
-
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
-      payment_method: {
-        billing_details: {
-          name: "John Doe", // Replace with the actual name
-          email: "john.doe@example.com", // Replace with the actual email
-          address: {
-            line1: "123 Main St", // Replace with the actual address
-            city: "City", // Replace with the actual city
-            postal_code: "12345", // Replace with the actual postal code
-            country: "US", // Replace with the actual country code
-          },
-          phone: "+1234567890", // Replace with the actual phone number
-        },
-      },
       confirmParams: {
-        // return_url: `http://localhost:3000/Payment/success.html`,
-        return_url: `https://odbhootstore.vercel.app/Payment/success.html`,
+        // return_url: window.location.href,
+        return_url: `http://localhost:3000/Payment/success.html`,
+        // return_url: `https://odbhootstore.vercel.app/Payment/success.html`,
       },
     });
 
@@ -81,7 +73,11 @@ export default function CheckoutForm() {
     }
 
     if (paymentIntent.status === "succeeded") {
-      // console.log({ success: paymentIntent });
+      axiosHttp.post("/users/customer", { status: "yes" }).then((res) => {
+        console.log(res?.data);
+      });
+
+      console.log({ success: paymentIntent });
       setMessage("Payment succeeded!");
     } else {
       setMessage("Something went wrong.");
@@ -97,12 +93,12 @@ export default function CheckoutForm() {
   return (
     <form id="payment-form" onSubmit={handleSubmit}>
       <PaymentElement id="payment-element" options={paymentElementOptions} />
-      {/* <button disabled={isLoading || !stripe || !elements} id="submit">
-        <span id="button-text">{isLoading ? <div className="spinner" id="spinner"></div> : "Pay now"}</span>
-      </button> */}
       <button disabled={isLoading || !stripe || !elements} id="submit" className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">
-        Pay Now
+        {isLoading ? "Paying..." : "Pay now"}
       </button>
+      {/* <button disabled={isLoading || !stripe || !elements} id="submit" className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">
+        Pay Now
+      </button> */}
 
       {/* Show any error or success messages */}
       {message && <div id="payment-message">{message}</div>}

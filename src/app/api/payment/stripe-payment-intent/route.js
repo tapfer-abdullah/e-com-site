@@ -8,26 +8,37 @@ const calculateOrderAmount = (items) => {
 };
 
 export const POST = async (request) => {
-    const { items } = await request.json();
-    // console.log(items)
+    const { personalInfo, cart } = await request.json();
 
-    // if (!amount) {
-    //     return NextResponse.json({ error: true, message: "price not found!" })
-    // }
+    // console.log({ personalInfo, cart })
 
-    console.log(items)
-    // Create a PaymentIntent with the order amount and currency
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount: calculateOrderAmount(items),
-        currency: "eur",
-        automatic_payment_methods: {
-            enabled: true,
-        }
+    const customer = await stripe.customers.create({
+        name: personalInfo?.firstName + " " + personalInfo?.lastName,
+        email: personalInfo?.email,
+        address: {
+            line1: personalInfo?.address,
+            city: personalInfo?.city,
+            postal_code: personalInfo?.postalCode,
+            country: personalInfo?.country,
+        },
+        phone: "+1234567890",
+        // id: "bd03"
     });
+
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: 1000,
+        currency: "eur",
+        payment_method_types: ["card"],
+        customer: customer.id,
+        description: "Payment for order #1004",
+    });
+
 
     return NextResponse.json({
         clientSecret: paymentIntent.client_secret,
     });
+    // return NextResponse.json({
+    // });
 
 }
 

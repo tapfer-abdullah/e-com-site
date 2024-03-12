@@ -10,14 +10,16 @@ import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { MdErrorOutline } from "react-icons/md";
-import CheckoutForm from "./CheckoutForm";
+// import CheckoutForm from "./CheckoutForm";
 import "./commonCss.css";
 
+import { OrderStateProvider } from "@/Components/State/OrderState";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { PayPalButtons } from "@paypal/react-paypal-js";
+import CheckoutForm from "./CheckoutForm";
 
 const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} square {...props} />)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
@@ -82,7 +84,9 @@ const ELEMENTS_OPTIONS = {
   ],
 };
 
-export default function Payment() {
+// export default function Payment({ cusInfo }) {
+const Payment = ({ cusInfo }) => {
+  const { dataForBxGy, cartData } = useContext(OrderStateProvider);
   const [expanded, setExpanded] = React.useState("panel2");
 
   const handleChange = (panel) => (event, newExpanded) => {
@@ -92,13 +96,15 @@ export default function Payment() {
   const [cardType, setCardType] = useState(null);
   const [clientSecret, setClientSecret] = React.useState("");
 
+  console.log({ cusInfo });
+
   React.useEffect(() => {
     if (expanded == "panel1") {
-      axiosHttp.post("/payment/stripe-payment-intent", { items: [{ id: "xl-tshirt" }] }).then((data) => {
+      axiosHttp.post("/payment/stripe-payment-intent", { cart: dataForBxGy, personalInfo: cusInfo }).then((data) => {
         setClientSecret(data.data.clientSecret);
       });
     }
-  }, [expanded]);
+  }, [expanded, dataForBxGy]);
 
   const appearance = {
     theme: "stripe",
@@ -178,7 +184,7 @@ export default function Payment() {
           <div className="AppWrapper">
             {clientSecret && (
               <Elements options={options} stripe={stripePromise}>
-                <CheckoutForm clientSecret={clientSecret} data={{ cardType, setCardType }} />
+                <CheckoutForm clientSecret={clientSecret} cusInfo={cusInfo} data={{ cardType, setCardType }} />
               </Elements>
             )}
 
@@ -231,4 +237,6 @@ export default function Payment() {
       )}
     </div>
   );
-}
+};
+
+export default Payment;

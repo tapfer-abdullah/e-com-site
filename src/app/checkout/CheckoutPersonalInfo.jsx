@@ -10,10 +10,11 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import React, { useContext, useEffect, useState } from "react";
 import { MdOutlineEuroSymbol } from "react-icons/md";
 import Payment from "./Payment/Payment";
+// import Payment from "./Payment/Payment";
 
 // import PreviewPage from "./Payment/Payment2";
 
-const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedCountry, setEmail, email }) => {
+const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedCountry, setEmail, email, cusInfo, setCusInfo }) => {
   const { allCountryData } = useContext(OrderStateProvider);
   const [tip, setTip] = useState(null);
   const [tipValue, setTipValue] = useState(null);
@@ -21,6 +22,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
   const handleTips = (event, newTip) => {
     setTip(newTip);
     setTips((subTotal * newTip) / 100);
+    setCusInfo({ ...cusInfo, tips: (subTotal * newTip) / 100.0 || 0 });
     setTipValue("");
   };
 
@@ -28,11 +30,13 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
     if (tipValue > 0) {
       setTip(null);
       setTips(parseFloat(tipValue));
+      setCusInfo({ ...cusInfo, tips: parseFloat(tipValue) || 0 });
     }
   };
 
   const handleCountryChange = (event, value) => {
     setSelectedCountry(value);
+    setCusInfo({ ...cusInfo, country: value?.label });
   };
 
   // const handleCustomTips = (e) => {
@@ -59,6 +63,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
             onChange={(e) => {
               setEmail(e.target.value);
             }}
+            onBlur={(e) => setCusInfo({ ...cusInfo, email: e.target.value })}
             required
             type="email"
             name="email"
@@ -96,16 +101,86 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
         </div>
 
         <div className="flex items-center gap-2">
-          <TextField required type="text" name="firstName" id="firstName" className="rounded-md w-full border-2 " label="First name" />
-          <TextField required type="text" name="lastName" id="lastName" className="rounded-md w-full border-2 " label="Last name" />
+          <TextField
+            // value={email}
+            onBlur={(e) => {
+              setCusInfo({ ...cusInfo, firstName: e.target.value });
+            }}
+            required
+            type="text"
+            name="firstName"
+            id="firstName"
+            className="rounded-md w-full border-2 "
+            label="First name"
+          />
+          <TextField
+            onBlur={(e) => {
+              setCusInfo({ ...cusInfo, lastName: e.target.value });
+            }}
+            required
+            type="text"
+            name="lastName"
+            id="lastName"
+            className="rounded-md w-full border-2 "
+            label="Last name"
+          />
         </div>
-        <TextField required type="text" name="address" id="address" className="rounded-md w-full border-2" label="Address" />
-        <TextField required type="text" name="apartment" id="apartment" className="rounded-md w-full border-2" label="Apartment / suite / etc." />
+        <TextField
+          onBlur={(e) => {
+            setCusInfo({ ...cusInfo, address: e.target.value });
+          }}
+          required
+          type="text"
+          name="address"
+          id="address"
+          className="rounded-md w-full border-2"
+          label="Address"
+        />
+        <TextField
+          onBlur={(e) => {
+            setCusInfo({ ...cusInfo, apartment: e.target.value });
+          }}
+          required
+          type="text"
+          name="apartment"
+          id="apartment"
+          className="rounded-md w-full border-2"
+          label="Apartment / suite / etc."
+        />
         <div className="flex items-center gap-2">
-          <TextField required type="text" name="postalCode" id="postalCode" className="rounded-md w-full border-2 " label="Postal code" />
-          <TextField required type="text" name="city" id="city" className="rounded-md w-full border-2 " label="City" />
+          <TextField
+            onBlur={(e) => {
+              setCusInfo({ ...cusInfo, postalCode: e.target.value });
+            }}
+            required
+            type="text"
+            name="postalCode"
+            id="postalCode"
+            className="rounded-md w-full border-2 "
+            label="Postal code"
+          />
+          <TextField
+            onBlur={(e) => {
+              setCusInfo({ ...cusInfo, city: e.target.value });
+            }}
+            required
+            type="text"
+            name="city"
+            id="city"
+            className="rounded-md w-full border-2 "
+            label="City"
+          />
         </div>
-        <TextField type="text" name="address" id="address" className="rounded-md w-full border-2" label="Phone number" />
+        <TextField
+          onBlur={(e) => {
+            setCusInfo({ ...cusInfo, phoneNumber: e.target.value });
+          }}
+          type="text"
+          name="address"
+          id="address"
+          className="rounded-md w-full border-2"
+          label="Phone number"
+        />
       </div>
       <div className="flex items-center gap-2 mt-2">
         <input type="checkbox" name="saveInfo" id="saveInfo" />
@@ -140,6 +215,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
             <MdOutlineEuroSymbol className="absolute left-2 top-[13px]" />
             <input
               onChange={(e) => setTipValue(e.target.value || 0)}
+              // onBlur={(e) => setCusInfo({ ...cusInfo, tips: e.target.value || 0 })}
               value={tipValue}
               min={1}
               type="number"
@@ -162,7 +238,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
       </div>
 
       {/* Payment options */}
-      <Payment />
+      <Payment cusInfo={cusInfo} />
       {/* <button className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">Pay Now</button> */}
     </div>
   );
