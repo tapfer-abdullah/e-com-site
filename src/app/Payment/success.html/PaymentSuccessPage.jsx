@@ -23,14 +23,16 @@ const PaymentSuccessPage = () => {
       setOrderNumber(urlParams.get("orderNumber"));
 
       const clientSecret = new URLSearchParams(window.location.search).get("payment_intent_client_secret");
+      let cardID = localStorage.getItem("obs-card-id");
 
       if (clientSecret && email && orderNumber) {
         setPaymentIntentClientSecret(clientSecret);
         axiosHttp
           // .get(`/payment/get-payment-details?client_secret=${payment_intent}`)
-          .post(`/payment/success?client_secret=${payment_intent}`, { email, orderNumber })
+          .post(`/payment/success?client_secret=${payment_intent}`, { email, orderNumber, cardID })
           .then((response) => {
-            console.log(response.data);
+            // console.log(response.data);
+            localStorage.setItem("obs-card-id", "undefined");
             // Send payment details to your server
           })
           .catch((error) => {

@@ -32,6 +32,8 @@ const CheckoutProductsInfo = ({
   shipping,
   shippingAmount,
   shippingReqAmount,
+  total,
+  setTotal,
 }) => {
   const { cartData } = useContext(OrderStateProvider);
 
@@ -44,7 +46,17 @@ const CheckoutProductsInfo = ({
     }
     setSubtotal(sum);
     setQuantity(quantity);
-  }, [cartData]);
+
+    if (disAdditionalType == "AOffO") {
+      if (discountType == "Fixed") {
+        setTotal(sum + shippingAmount + tip - amountToBeReduce);
+      } else {
+        setTotal(sum + tip - (sum * parseInt(amountToBeReduce)) / 100);
+      }
+    } else {
+      setTotal(sum + shippingAmount + tip - minusAmount);
+    }
+  }, [cartData, discountCode, tip, shippingAmount, amountToBeReduce, minusAmount, setSubtotal, setQuantity, disAdditionalType, discountType, setTotal]);
 
   return (
     <div className="bg-[#f5f5f5] -mt-5 p-10 border-l-2">
@@ -156,9 +168,10 @@ const CheckoutProductsInfo = ({
           <span>Total:</span>
           <p className="flex justify-end items-center gap-1">
             <MdOutlineEuroSymbol />
-            {disAdditionalType != "AOffO" && <span>{subTotal + shippingAmount + tip - minusAmount}</span>}
+            {total}
+            {/* {disAdditionalType != "AOffO" && <span>{subTotal + shippingAmount + tip - minusAmount}</span>}
             {disAdditionalType == "AOffO" &&
-              (discountType == "Fixed" ? <span>{subTotal + shippingAmount + tip - amountToBeReduce}</span> : <span>{subTotal + tip - (subTotal * parseInt(amountToBeReduce)) / 100}</span>)}
+              (discountType == "Fixed" ? <span>{subTotal + shippingAmount + tip - amountToBeReduce}</span> : <span>{subTotal + tip - (subTotal * parseInt(amountToBeReduce)) / 100}</span>)} */}
           </p>
         </div>
       </div>

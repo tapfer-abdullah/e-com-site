@@ -20,6 +20,17 @@ export const GET = async (request) => {
 
 }
 
+
+
+const calculateOrderAmount = (items, shipping = 0) => {
+
+    const sum = items.reduce((accumulator, currentItem) => {
+        return accumulator + (currentItem.price * currentItem.quantity);
+    }, shipping);
+
+    return sum;
+};
+
 export const POST = async (request) => {
     function generateRandomOrderNumber() {
         const randomComponent = Math.floor(Math.random() * 10000);
@@ -41,8 +52,19 @@ export const POST = async (request) => {
 
 
 
-    const { cusInfo, cart } = await request.json();
-    console.log("clicked......", cusInfo)
+    const { cusInfo, cart, amount } = await request.json();
+    // console.log("clicked......", cusInfo)
+
+    let totalAmount = 0;
+    if (cusInfo?.discountCode) {
+        // to do: discount code validate and calculation 
+        totalAmount = amount;
+    }
+    else {
+        totalAmount = calculateOrderAmount(cart, cusInfo?.shipping || 0);
+        totalAmount += cusInfo?.tips;
+        // console.log({ totalAmount })
+    }
 
     let cartProduct = [];
     cart?.forEach(element => {
@@ -58,7 +80,8 @@ export const POST = async (request) => {
         date: formattedDate,
         time: formattedTime,
         orderNumber: `abn${orderNumber}`,
-        cart: cartProduct
+        cart: cartProduct,
+        totalPaid: amount
     }
 
     let personalInfo = {
@@ -78,19 +101,21 @@ export const POST = async (request) => {
     }
 
     let orderNumberOfDB = `abn${orderNumber}`;
-
     try {
-        const existingCart = await OrderSchema.findOne({ email: cusInfo?.email }).select('-cart');
-        if (existingCart) {
-            orderNumber = existingCart?.orderNumber;
-            // orderData.date = formattedDate;
-            // orderData.time = formattedTime;
-
-            const result = await OrderSchema.updateOne({ email: cusInfo?.email }, orderData, { new: true })
-        }
-        else {
+        let result1;
+        if (cusInfo?.cardID !== 'undefined') {
+            const existingCart = await OrderSchema.findById(cusInfo?.cardID).select('-cart');
+            if (existingCart) {
+                orderNumber = existingCart?.orderNumber;
+                result1 = await OrderSchema.findByIdAndUpdate(cusInfo?.cardID, orderData, { new: true });
+            }
+            else {
+                const data = new OrderSchema(orderData);
+                result1 = await data.save();
+            }
+        } else {
             const data = new OrderSchema(orderData);
-            const result = await data.save();
+            result1 = await data.save();
         }
 
 
@@ -100,17 +125,49 @@ export const POST = async (request) => {
             personalInfo.firstVisitedTime = existingUser?.formattedTime || cusInfo?.formattedTime;
             personalInfo.about = existingUser?.about || "";
 
-            const result = await CustomerSchema.updateOne({ email: cusInfo?.email }, personalInfo, { new: true });
-            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result, orderNumberOfDB } })
+            const result2 = await CustomerSchema.updateOne({ email: cusInfo?.email }, personalInfo, { new: true });
+            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, result1, orderNumberOfDB } })
         }
         else {
             const data2 = new CustomerSchema(personalInfo);
             const result2 = await data2.save();
-            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, orderNumberOfDB } })
+            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, result1, orderNumberOfDB } })
         }
 
 
     }
+    // try {
+    //     const existingCart = await OrderSchema.findOne({ email: cusInfo?.email }).select('-cart');
+    //     if (existingCart) {
+    //         orderNumber = existingCart?.orderNumber;
+    //         // orderData.date = formattedDate;
+    //         // orderData.time = formattedTime;
+
+    //         const result = await OrderSchema.updateOne({ email: cusInfo?.email }, orderData, { new: true })
+    //     }
+    //     else {
+    //         const data = new OrderSchema(orderData);
+    //         const result = await data.save();
+    //     }
+
+
+    //     const existingUser = await CustomerSchema.findOne({ email: cusInfo?.email });
+    //     if (existingUser) {
+    //         personalInfo.firstVisitedDate = existingUser?.formattedDate || cusInfo?.formattedDate;
+    //         personalInfo.firstVisitedTime = existingUser?.formattedTime || cusInfo?.formattedTime;
+    //         personalInfo.about = existingUser?.about || "";
+
+    //         const result = await CustomerSchema.updateOne({ email: cusInfo?.email }, personalInfo, { new: true });
+    //         return NextResponse.json({ message: "Customer added & card created", status: true, data: { result, orderNumberOfDB } })
+    //     }
+    //     else {
+    //         const data2 = new CustomerSchema(personalInfo);
+    //         const result2 = await data2.save();
+    //         return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, orderNumberOfDB } })
+    //     }
+
+
+    // }
     catch (error) {
         console.log(error)
         return NextResponse.json({ message: "Customer & card unable to add!", status: false });

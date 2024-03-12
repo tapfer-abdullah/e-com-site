@@ -3,6 +3,7 @@ import { OrderStateProvider } from "@/Components/State/OrderState";
 import { axiosHttp } from "@/app/helper/axiosHttp";
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import React, { useContext } from "react";
+import Swal from "sweetalert2";
 
 export default function CheckoutForm({ cusInfo }) {
   const { customer, setCustomer } = useContext(OrderStateProvider);
@@ -12,10 +13,21 @@ export default function CheckoutForm({ cusInfo }) {
   const [message, setMessage] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  console.log({ customer });
+  // console.log({ cusInfo });
+
+  const { address, apartment, city, country, discountCode, email, firstName, lastName, phoneNumber, postalCode, shipping, tips } = cusInfo;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!address || !apartment || !city || !country || !email || !firstName || !lastName || !postalCode) {
+      Swal.fire({
+        title: "Form is incomplete!",
+        text: "Please the provide delivery info before payment",
+        icon: "warning",
+      });
+      return;
+    }
 
     if (!stripe || !elements) {
       return;
