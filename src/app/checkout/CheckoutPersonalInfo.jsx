@@ -14,7 +14,7 @@ import Payment from "./Payment/Payment";
 
 // import PreviewPage from "./Payment/Payment2";
 
-const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedCountry, setEmail, email, cusInfo, setCusInfo }) => {
+const CheckoutPersonalInfo = ({ total, setTotal, setTips, subTotal, selectedCountry, setSelectedCountry, setEmail, email, cusInfo, setCusInfo }) => {
   const { allCountryData } = useContext(OrderStateProvider);
   const [tip, setTip] = useState(null);
   const [tipValue, setTipValue] = useState(null);
@@ -89,7 +89,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
             style={{ width: "100%" }}
             value={selectedCountry}
             onChange={handleCountryChange}
-            renderInput={(params) => <TextField {...params} label="Country / Region" variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label="Country / Region *" variant="outlined" />}
             renderOption={(props, option) => (
               <MenuItem key={option?.id} {...props}>
                 <Avatar src={option.imageUrl} alt={option.label} />
@@ -238,7 +238,7 @@ const CheckoutPersonalInfo = ({ setTips, subTotal, selectedCountry, setSelectedC
       </div>
 
       {/* Payment options */}
-      <Payment cusInfo={cusInfo} />
+      <Payment cusInfo={cusInfo} total={total} />
       {/* <button className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">Pay Now</button> */}
     </div>
   );

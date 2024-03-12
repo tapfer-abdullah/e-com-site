@@ -24,13 +24,13 @@ export const GET = async (request) => {
 
 export const POST = async (request, { params }) => {
     const url = request.url;
-    const { email, orderNumber } = await request.json();
+    const { email, orderNumber, cardID } = await request.json();
 
     const { query } = parse(url, true);
 
     const searchParams = new URLSearchParams(query);
     const clientSecret = searchParams.get('client_secret');
-    console.log({ clientSecret, email, orderNumber })
+    // console.log({ clientSecret, email, orderNumber })
 
     try {
         const paymentIntent = await stripe.paymentIntents.retrieve(clientSecret);
@@ -41,12 +41,11 @@ export const POST = async (request, { params }) => {
                 $set: {
                     orderNumber: newData,
                     status: "paid",
-                    // Add more fields as needed
                 },
             };
 
-            const result1 = await OrderSchema.findOneAndUpdate({ orderNumber: orderNumber }, update, { new: true });
-            console.log({ result1 })
+            const result1 = await OrderSchema.findByIdAndUpdate(cardID, update, { new: true });
+            // console.log({ result1 })
             return NextResponse.json(result1);
         }
     } catch (error) {

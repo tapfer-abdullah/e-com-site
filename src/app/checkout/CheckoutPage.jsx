@@ -23,6 +23,7 @@ const CheckoutPage = () => {
   const { customer, setCustomer, dataForBxGy, promoCode, setPromoCode, allCountryData } = useContext(OrderStateProvider);
   const [tip, setTip] = useState(0);
   const [subTotal, setSubtotal] = useState(0);
+  const [total, setTotal] = useState(0);
   const [quantity, setQuantity] = useState(0);
 
   const [disError, setDisError] = useState("");
@@ -63,10 +64,6 @@ const CheckoutPage = () => {
     shipping: shippingAmount,
     tips: tip,
   });
-
-  // console.log({ cusInfo, discountCode });
-  // console.log(selectedCountry);
-  // console.log({ email, selectedCountry, shipping, shippingAmount, minusAmount });
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -461,17 +458,19 @@ const CheckoutPage = () => {
       return emailPattern.test(email);
     }
 
-    // console.log(email);
-    // console.log(isValidEmail(email));
+    let cardID = localStorage.getItem("obs-card-id");
+    console.log({ cardID });
 
     if (isValidEmail(cusInfo?.email)) {
       cusInfo.discountCode = discountCode;
-      axiosHttp.post("/checkout/abandoned", { cusInfo, cart: dataForBxGy, discountCode }).then((res) => {
-        // console.log(res.data?.data?.orderNumberOfDB);
+      cusInfo.cardID = cardID || "";
+      axiosHttp.post("/checkout/abandoned", { cusInfo, cart: dataForBxGy, discountCode, amount: total }).then((res) => {
+        // console.log(res.data, res.data?.data?.result1?._id);
+        localStorage.setItem("obs-card-id", res.data?.data?.result1?._id);
         setCustomer({ ...customer, email: email, orderNumber: res?.data?.data?.orderNumberOfDB });
       });
     }
-  }, [cusInfo, dataForBxGy, discountCode]);
+  }, [cusInfo, dataForBxGy, discountCode, total]);
 
   // console.log({ customer });
 
@@ -525,8 +524,12 @@ const CheckoutPage = () => {
             setEmail={setEmail}
             selectedCountry={selectedCountry}
             setSelectedCountry={setSelectedCountry}
+            total={total}
+            setTotal={setTotal}
           />
           <CheckoutProductsInfo
+            total={total}
+            setTotal={setTotal}
             email={email}
             selectedCountry={selectedCountry}
             handleDiscountCode={handleDiscountCode}

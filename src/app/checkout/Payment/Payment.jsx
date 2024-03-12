@@ -19,6 +19,7 @@ import { OrderStateProvider } from "@/Components/State/OrderState";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { PayPalButtons } from "@paypal/react-paypal-js";
+import Swal from "sweetalert2";
 import CheckoutForm from "./CheckoutForm";
 
 const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} square {...props} />)(({ theme }) => ({
@@ -85,7 +86,7 @@ const ELEMENTS_OPTIONS = {
 };
 
 // export default function Payment({ cusInfo }) {
-const Payment = ({ cusInfo }) => {
+const Payment = ({ cusInfo, total }) => {
   const { dataForBxGy, cartData } = useContext(OrderStateProvider);
   const [expanded, setExpanded] = React.useState("panel2");
 
@@ -96,15 +97,31 @@ const Payment = ({ cusInfo }) => {
   const [cardType, setCardType] = useState(null);
   const [clientSecret, setClientSecret] = React.useState("");
 
-  console.log({ cusInfo });
+  // console.log({ cusInfo });
+  const { address, apartment, city, country, discountCode, email, firstName, lastName, phoneNumber, postalCode, shipping, tips } = cusInfo;
 
   React.useEffect(() => {
     if (expanded == "panel1") {
-      axiosHttp.post("/payment/stripe-payment-intent", { cart: dataForBxGy, personalInfo: cusInfo }).then((data) => {
+      if (!address || !apartment || !city || !country || !email || !firstName || !lastName || !postalCode) {
+        setExpanded("panel2");
+        Swal.fire({
+          title: "Form is incomplete!",
+          text: "Please the provide delivery info before payment",
+          icon: "warning",
+        });
+        return;
+      }
+
+      axiosHttp.post("/payment/stripe-payment-intent", { cart: dataForBxGy, personalInfo: cusInfo, amount: total }).then((data) => {
         setClientSecret(data.data.clientSecret);
       });
     }
-  }, [expanded, dataForBxGy]);
+  }, [expanded, dataForBxGy, discountCode, total, address, apartment, city, country, email, firstName, lastName, postalCode, cusInfo]);
+
+  React.useEffect(() => {
+    setExpanded("panel2");
+    setClientSecret("");
+  }, [total]);
 
   const appearance = {
     theme: "stripe",

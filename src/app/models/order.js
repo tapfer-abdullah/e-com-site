@@ -32,6 +32,10 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
     discountCode: String,
+    totalPaid: {
+        type: Number,
+        min: 0
+    },
     shipping: Number,
     tips: {
         type: Number,
