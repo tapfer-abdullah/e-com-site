@@ -1,53 +1,18 @@
 "use client";
+import { OrderStateProvider } from "@/Components/State/OrderState";
 import { axiosHttp } from "@/app/helper/axiosHttp";
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import React from "react";
+import React, { useContext } from "react";
 
 export default function CheckoutForm({ cusInfo }) {
+  const { customer, setCustomer } = useContext(OrderStateProvider);
   const stripe = useStripe();
   const elements = useElements();
 
   const [message, setMessage] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  React.useEffect(() => {
-    if (!stripe) {
-      return;
-    }
-
-    const clientSecret = new URLSearchParams(window.location.search).get("payment_intent_client_secret");
-
-    console.log({ clientSecret });
-
-    if (!clientSecret) {
-      return;
-    }
-
-    stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
-      switch (paymentIntent.status) {
-        case "succeeded":
-          {
-            console.log({ success: paymentIntent });
-            setMessage("Payment succeeded!");
-            axiosHttp.post("/users/customer", dataForBxGy).then((res) => {
-              console.log(res?.data);
-            });
-          }
-          break;
-        case "processing":
-          setMessage("Your payment is processing.");
-          break;
-        case "requires_payment_method":
-          setMessage("Your payment was not successful, please try again.");
-          break;
-        default:
-          setMessage("Something went wrong.");
-          break;
-      }
-    });
-  }, [stripe]);
-
-  // console.log({ elements });
+  console.log({ customer });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,9 +25,8 @@ export default function CheckoutForm({ cusInfo }) {
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // return_url: window.location.href,
-        return_url: `http://localhost:3000/Payment/success.html`,
-        // return_url: `https://odbhootstore.vercel.app/Payment/success.html`,
+        // return_url: `http://localhost:3000/Payment/success.html?orderNumber=${customer?.orderNumber}&email=${customer?.email}`,
+        return_url: `https://odbhootstore.vercel.app/Payment/success.html?orderNumber=${customer?.orderNumber}&email=${customer?.email}`,
       },
     });
 

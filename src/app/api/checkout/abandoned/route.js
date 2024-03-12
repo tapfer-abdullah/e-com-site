@@ -77,6 +77,8 @@ export const POST = async (request) => {
         orders: [{ orderNumber: `abn${orderNumber}`, status: "abandoned" }]
     }
 
+    let orderNumberOfDB = `abn${orderNumber}`;
+
     try {
         const existingCart = await OrderSchema.findOne({ email: cusInfo?.email }).select('-cart');
         if (existingCart) {
@@ -98,13 +100,13 @@ export const POST = async (request) => {
             personalInfo.firstVisitedTime = existingUser?.formattedTime || cusInfo?.formattedTime;
             personalInfo.about = existingUser?.about || "";
 
-            const result = await CustomerSchema.updateOne({ email: cusInfo?.email }, personalInfo, { new: true })
-            return NextResponse.json({ message: "Customer added & card created", status: true, data: result })
+            const result = await CustomerSchema.updateOne({ email: cusInfo?.email }, personalInfo, { new: true });
+            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result, orderNumberOfDB } })
         }
         else {
             const data2 = new CustomerSchema(personalInfo);
             const result2 = await data2.save();
-            return NextResponse.json({ message: "Customer added & card created", status: true, data: result2 })
+            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, orderNumberOfDB } })
         }
 
 

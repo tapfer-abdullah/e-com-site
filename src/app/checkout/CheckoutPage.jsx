@@ -20,7 +20,7 @@ const style = {
 };
 
 const CheckoutPage = () => {
-  const { dataForBxGy, promoCode, setPromoCode, allCountryData } = useContext(OrderStateProvider);
+  const { customer, setCustomer, dataForBxGy, promoCode, setPromoCode, allCountryData } = useContext(OrderStateProvider);
   const [tip, setTip] = useState(0);
   const [subTotal, setSubtotal] = useState(0);
   const [quantity, setQuantity] = useState(0);
@@ -467,10 +467,13 @@ const CheckoutPage = () => {
     if (isValidEmail(cusInfo?.email)) {
       cusInfo.discountCode = discountCode;
       axiosHttp.post("/checkout/abandoned", { cusInfo, cart: dataForBxGy, discountCode }).then((res) => {
-        // console.log(res.data);
+        // console.log(res.data?.data?.orderNumberOfDB);
+        setCustomer({ ...customer, email: email, orderNumber: res?.data?.data?.orderNumberOfDB });
       });
     }
   }, [cusInfo, dataForBxGy, discountCode]);
+
+  // console.log({ customer });
 
   return (
     <>

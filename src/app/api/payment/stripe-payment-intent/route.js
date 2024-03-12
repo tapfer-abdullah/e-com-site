@@ -30,6 +30,7 @@ export const POST = async (request) => {
         currency: "eur",
         payment_method_types: ["card"],
         customer: customer.id,
+        receipt_email: personalInfo?.email || null,
         description: "Payment for order #1004",
     });
 
