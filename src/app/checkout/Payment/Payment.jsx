@@ -188,46 +188,98 @@ const Payment = ({ cusInfo, total }) => {
   // };
 
   const createOrder = (data, actions) => {
-    return actions.order
-      .create({
-        purchase_units: [
-          {
-            reference_id: "item1",
-            description: "Watch",
-            amount: {
+    let cartArray = [];
+
+    dataForBxGy.forEach((item) => {
+      data = {
+        reference_id: item.sku,
+        description: item.name,
+        amount: {
+          currency_code: "USD",
+          value: item.price,
+          breakdown: {
+            item_total: {
               currency_code: "USD",
-              value: "2.00",
+              value: item.price,
             },
             shipping: {
-              name: {
-                full_name: "John Doe",
-              },
-              address: {
-                address_line_1: "123 Shipping St",
-                admin_area_2: "City",
-                admin_area_1: "State",
-                postal_code: "12345",
-                country_code: "US",
-              },
-            },
-          },
-          {
-            reference_id: "item2",
-            description: "GYM",
-            amount: {
               currency_code: "USD",
-              value: "3.00",
+              value: "10.00",
             },
-          },
-          {
-            reference_id: "item3",
-            description: "Pant",
-            amount: {
+            discount: {
               currency_code: "USD",
-              value: 5,
+              value: "0.00",
             },
           },
-        ],
+        },
+        address: {
+          address_line_1: "123 Shipping St",
+          admin_area_2: "City",
+          admin_area_1: "State",
+          postal_code: "12345",
+          country_code: "US",
+        },
+      };
+      cartArray.push(data);
+    });
+
+    return actions.order
+      .create({
+        // purchase_units: [
+        //   {
+        //     reference_id: "item1",
+        //     description: "Watch",
+        //     amount: {
+        //       value: "2.00", // Base price of the watch
+        //       currency_code: "USD", // Currency code
+        //       breakdown: {
+        //         item_total: {
+        //           currency_code: "USD",
+        //           value: "2.00", // Base price of the watch
+        //         },
+        //         shipping: {
+        //           currency_code: "USD",
+        //           value: "5.00", // Shipping cost
+        //         },
+        //         handling: {
+        //           currency_code: "USD",
+        //           value: "1.00", // Handling fee (tips)
+        //         },
+        //         discount: {
+        //           currency_code: "USD",
+        //           value: "8.00", // Discount applied (in this case, it's free)
+        //         },
+        //       },
+        //     },
+        //   },
+        //   {
+        //     reference_id: "item2",
+        //     description: "Watch",
+        //     amount: {
+        //       value: "6.00", // Base price of the watch
+        //       currency_code: "USD", // Currency code
+        //       breakdown: {
+        //         item_total: {
+        //           currency_code: "USD",
+        //           value: "2.00", // Base price of the watch
+        //         },
+        //         shipping: {
+        //           currency_code: "USD",
+        //           value: "5.00", // Shipping cost
+        //         },
+        //         handling: {
+        //           currency_code: "USD",
+        //           value: "1.00", // Handling fee (tips)
+        //         },
+        //         discount: {
+        //           currency_code: "USD",
+        //           value: "2.00", // Discount applied (in this case, it's free)
+        //         },
+        //       },
+        //     },
+        //   },
+        // ],
+        purchase_units: cartArray,
         // application_context: {
         //   shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
         //   user_action: "PAY_NOW", // Use this to hide Pay Later option
@@ -254,6 +306,51 @@ const Payment = ({ cusInfo, total }) => {
       setPaypalSuccess(true);
     });
   };
+
+  // const createOrder = async (data, actions) => {
+  //   console.log("create...", { actions });
+  //   // Order is created on the server and the order id is returned
+  //   return fetch("http://localhost:3000/api/payment/paypal/create-paypal-order", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     // use the "body" param to optionally pass additional order information
+  //     // like product skus and quantities
+  //     body: JSON.stringify({
+  //       cart: [
+  //         {
+  //           sku: "YOUR_PRODUCT_STOCK_KEEPING_UNIT",
+  //           quantity: "YOUR_PRODUCT_QUANTITY",
+  //         },
+  //       ],
+  //     }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((order) => {
+  //       console.log({ order });
+  //       return order.id;
+  //     });
+  // };
+  // const onApprove = async (data, actions) => {
+  //   console.log("capture...");
+  //   // Order is captured on the server and the response is returned to the browser
+  //   return fetch("http://localhost:3000/api/payment/paypal/capture-paypal-order", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       orderID: data.orderID,
+  //     }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((details) => {
+  //       const { payer } = details;
+  //       console.log({ payer, details });
+  //       setPaypalSuccess(true);
+  //     });
+  // };
 
   const initialOptions = {
     clientId: process.env.PAYPAL_CLIENT_ID,
