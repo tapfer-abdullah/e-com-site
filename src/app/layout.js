@@ -4,6 +4,8 @@ import NavBar from '@/Components/Shared-Pages/NavBar'
 import OrderState from '@/Components/State/OrderState'
 import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 import { Inter } from 'next/font/google'
+import Head from 'next/head'
+import Script from 'next/script'
 import React from 'react'
 
 // if (typeof window === 'undefined') {
@@ -36,6 +38,19 @@ export default function RootLayout({ children }) {
   const resultArray = pathname.split("/").filter(Boolean);
   return (
     <html lang="en">
+
+      {/* <!-- Google tag (gtag.js) --> */}
+      <Script async src={`https://www.googletagmanager.com/gtag/js?id=${process.env.MEASUREMENT_ID}`}></Script>
+      <Script id='google-analytics'>
+        {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+  
+            gtag('config', ${process.env.MEASUREMENT_ID});
+          `}
+      </Script>
+
       <body className={`${inter.className} min-h-screen`}>
         <PayPalScriptProvider options={initialOptions}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
