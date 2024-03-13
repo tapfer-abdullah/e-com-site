@@ -33,7 +33,6 @@ const PaymentSuccessPage = () => {
           .then((response) => {
             // console.log(response.data);
             localStorage.setItem("obs-card-id", "undefined");
-            // Send payment details to your server
           })
           .catch((error) => {
             console.error("Error fetching payment details from Stripe:", error);
