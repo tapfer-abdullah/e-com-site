@@ -19,6 +19,7 @@ import { OrderStateProvider } from "@/Components/State/OrderState";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import CheckoutForm from "./CheckoutForm";
 
@@ -73,6 +74,7 @@ const ELEMENTS_OPTIONS = {
 
 const Payment = ({ cusInfo, total }) => {
   const { dataForBxGy, cartData } = useContext(OrderStateProvider);
+  const router = useRouter();
   // const [expanded, setExpanded] = React.useState("panel2");
   const [expanded, setExpanded] = React.useState("");
 
@@ -127,66 +129,6 @@ const Payment = ({ cusInfo, total }) => {
   const [paypalOrderID, setPaypalOrderID] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // const createOrder = (data, actions) => {
-  //   const itemTotal = 10.0; // Base price
-  //   const shipping = 0.0; // Shipping cost
-  //   const handling = 0.0; // Handling cost
-  //   const taxTotal = 1.5; // Tax
-  //   const shippingDiscount = 0.0; // Shipping discount
-  //   const discount = 2.0; // Discount
-  //   const tip = 5.0; // Tip
-
-  //   const totalAmount = itemTotal + shipping + handling + taxTotal - shippingDiscount - discount + tip;
-
-  //   // Ensure the value matches the total amount
-  //   const value = totalAmount.toFixed(2);
-
-  //   return actions.order
-  //     .create({
-  //       purchase_units: [
-  //         {
-  //           reference_id: "item1",
-  //           description: "Watch",
-  //           amount: {
-  //             value: "2.00",
-  //           },
-  //         },
-  //         {
-  //           reference_id: "item2",
-  //           description: "GYM",
-  //           amount: {
-  //             value: "3.00",
-  //           },
-  //         },
-  //         {
-  //           reference_id: "item3",
-  //           description: "Pant",
-  //           amount: {
-  //             currency_code: "USD", // Ensure consistent currency code with PayPal's expectations
-  //             value: value, // Update the value with the calculated total amount
-  //             breakdown: {
-  //               item_total: { currency_code: "USD", value: itemTotal.toFixed(2) }, // Base price
-  //               shipping: { currency_code: "USD", value: shipping.toFixed(2) }, // Shipping cost
-  //               handling: { currency_code: "USD", value: handling.toFixed(2) }, // Handling cost
-  //               tax_total: { currency_code: "USD", value: taxTotal.toFixed(2) }, // Tax
-  //               shipping_discount: { currency_code: "USD", value: shippingDiscount.toFixed(2) }, // Shipping discount
-  //               discount: { currency_code: "USD", value: discount.toFixed(2) }, // Discount
-  //               tip: { currency_code: "USD", value: tip.toFixed(2) }, // Tip
-  //             },
-  //           },
-  //         },
-  //       ],
-  //       application_context: {
-  //         shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
-  //         user_action: "PAY_NOW", // Use this to hide Pay Later option
-  //       },
-  //     })
-  //     .then((orderID) => {
-  //       setPaypalOrderID(orderID);
-  //       return orderID;
-  //     });
-  // };
-
   const createOrder = (data, actions) => {
     let cartArray = [];
 
@@ -196,7 +138,7 @@ const Payment = ({ cusInfo, total }) => {
         description: item.name,
         amount: {
           currency_code: "USD",
-          value: item.price,
+          value: item.price + 10.0,
           breakdown: {
             item_total: {
               currency_code: "USD",
@@ -209,6 +151,10 @@ const Payment = ({ cusInfo, total }) => {
             discount: {
               currency_code: "USD",
               value: "0.00",
+            },
+            handling: {
+              currency_code: "USD",
+              value: "0.00", // Handling fee (tips)
             },
           },
         },
@@ -225,65 +171,8 @@ const Payment = ({ cusInfo, total }) => {
 
     return actions.order
       .create({
-        // purchase_units: [
-        //   {
-        //     reference_id: "item1",
-        //     description: "Watch",
-        //     amount: {
-        //       value: "2.00", // Base price of the watch
-        //       currency_code: "USD", // Currency code
-        //       breakdown: {
-        //         item_total: {
-        //           currency_code: "USD",
-        //           value: "2.00", // Base price of the watch
-        //         },
-        //         shipping: {
-        //           currency_code: "USD",
-        //           value: "5.00", // Shipping cost
-        //         },
-        //         handling: {
-        //           currency_code: "USD",
-        //           value: "1.00", // Handling fee (tips)
-        //         },
-        //         discount: {
-        //           currency_code: "USD",
-        //           value: "8.00", // Discount applied (in this case, it's free)
-        //         },
-        //       },
-        //     },
-        //   },
-        //   {
-        //     reference_id: "item2",
-        //     description: "Watch",
-        //     amount: {
-        //       value: "6.00", // Base price of the watch
-        //       currency_code: "USD", // Currency code
-        //       breakdown: {
-        //         item_total: {
-        //           currency_code: "USD",
-        //           value: "2.00", // Base price of the watch
-        //         },
-        //         shipping: {
-        //           currency_code: "USD",
-        //           value: "5.00", // Shipping cost
-        //         },
-        //         handling: {
-        //           currency_code: "USD",
-        //           value: "1.00", // Handling fee (tips)
-        //         },
-        //         discount: {
-        //           currency_code: "USD",
-        //           value: "2.00", // Discount applied (in this case, it's free)
-        //         },
-        //       },
-        //     },
-        //   },
-        // ],
         purchase_units: cartArray,
-        // application_context: {
         //   shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
-        //   user_action: "PAY_NOW", // Use this to hide Pay Later option
-        // },
         application_context: {
           shipping_preference: "GET_FROM_FILE",
           user_action: "PAY_NOW",
@@ -301,9 +190,11 @@ const Payment = ({ cusInfo, total }) => {
 
   const onApprove = (data, actions) => {
     return actions.order.capture().then((details) => {
-      const { payer } = details;
+      const { payer, id } = details;
       console.log({ payer, details });
       setPaypalSuccess(true);
+      // router.push(`http://localhost:3000/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
+      router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
     });
   };
 
@@ -431,11 +322,8 @@ const Payment = ({ cusInfo, total }) => {
         </AccordionDetails>
       </Accordion>
       {expanded === "panel2" && (
-        // <button id="submit" className="text-xl text-white p-2 my-5 w-full bg-[#0070ba] rounded-md hover:bg-opacity-70 transition-all duration-300">
-        //   Pay with <span className="font-bold italic">PayPal</span>
-        // </button>
         <div className="py-5 border-t">
-          <PayPalScriptProvider options={initialOptions}>
+          <PayPalScriptProvider options={initialOptions} className="!z-[1]">
             <PayPalButtons
               style={{
                 color: "blue",
