@@ -434,7 +434,7 @@ const Payment = ({ cusInfo, total }) => {
         // <button id="submit" className="text-xl text-white p-2 my-5 w-full bg-[#0070ba] rounded-md hover:bg-opacity-70 transition-all duration-300">
         //   Pay with <span className="font-bold italic">PayPal</span>
         // </button>
-        <div className="my-5">
+        <div className="py-5 border-t">
           <PayPalScriptProvider options={initialOptions}>
             <PayPalButtons
               style={{
