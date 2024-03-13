@@ -18,7 +18,7 @@ import "./commonCss.css";
 import { OrderStateProvider } from "@/Components/State/OrderState";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { PayPalButtons } from "@paypal/react-paypal-js";
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import Swal from "sweetalert2";
 import CheckoutForm from "./CheckoutForm";
 
@@ -32,20 +32,6 @@ const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} s
     display: "none",
   },
 }));
-
-// const AccordionSummary = styled((props) => (
-//   <MuiAccordionSummary expandIcon={<RadioButtonCheckedIcon sx={{ fontSize: "0.9rem" }} />}
-//   CollapseIcon={<RadioButtonUncheckedIcon sx={{ fontSize: "0.9rem" }} />} {...props} />
-// ))(({ theme }) => ({
-//   //   backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, .05" : "rgba(0, 0, 0, .03)",
-//   flexDirection: "row-reverse",
-//   "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
-//     transform: "rotate(90deg)",
-//   },
-//   "& .MuiAccordionSummary-content": {
-//     marginLeft: theme.spacing(1),
-//   },
-// }));
 
 const AccordionSummary = styled((props) => {
   const { children, expandIcon, collapseIcon, ...other } = props;
@@ -85,25 +71,27 @@ const ELEMENTS_OPTIONS = {
   ],
 };
 
-// export default function Payment({ cusInfo }) {
 const Payment = ({ cusInfo, total }) => {
   const { dataForBxGy, cartData } = useContext(OrderStateProvider);
-  const [expanded, setExpanded] = React.useState("panel2");
+  // const [expanded, setExpanded] = React.useState("panel2");
+  const [expanded, setExpanded] = React.useState("");
 
   const handleChange = (panel) => (event, newExpanded) => {
     setExpanded(newExpanded ? panel : false);
   };
 
+  const { address, apartment, city, country, discountCode, email, firstName, lastName, phoneNumber, postalCode, shipping, tips } = cusInfo;
+
   const [cardType, setCardType] = useState(null);
   const [clientSecret, setClientSecret] = React.useState("");
 
-  // console.log({ cusInfo });
-  const { address, apartment, city, country, discountCode, email, firstName, lastName, phoneNumber, postalCode, shipping, tips } = cusInfo;
-
+  //-----------------------------------
+  //          stripe payment          |
+  // ----------------------------------
   React.useEffect(() => {
     if (expanded == "panel1") {
       if (!address || !apartment || !city || !country || !email || !firstName || !lastName || !postalCode) {
-        setExpanded("panel2");
+        setExpanded("");
         Swal.fire({
           title: "Form is incomplete!",
           text: "Please the provide delivery info before payment",
@@ -119,7 +107,7 @@ const Payment = ({ cusInfo, total }) => {
   }, [expanded, dataForBxGy, discountCode, total, address, apartment, city, country, email, firstName, lastName, postalCode, cusInfo]);
 
   React.useEffect(() => {
-    setExpanded("panel2");
+    setExpanded("");
     setClientSecret("");
   }, [total]);
 
@@ -131,26 +119,146 @@ const Payment = ({ cusInfo, total }) => {
     appearance,
   };
 
-  // console.log({ clientSecret });
+  //-----------------------------------
+  //          PayPal payment          |
+  // ----------------------------------
+
+  const [paypalSuccess, setPaypalSuccess] = useState(false);
+  const [paypalOrderID, setPaypalOrderID] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // const createOrder = (data, actions) => {
+  //   const itemTotal = 10.0; // Base price
+  //   const shipping = 0.0; // Shipping cost
+  //   const handling = 0.0; // Handling cost
+  //   const taxTotal = 1.5; // Tax
+  //   const shippingDiscount = 0.0; // Shipping discount
+  //   const discount = 2.0; // Discount
+  //   const tip = 5.0; // Tip
+
+  //   const totalAmount = itemTotal + shipping + handling + taxTotal - shippingDiscount - discount + tip;
+
+  //   // Ensure the value matches the total amount
+  //   const value = totalAmount.toFixed(2);
+
+  //   return actions.order
+  //     .create({
+  //       purchase_units: [
+  //         {
+  //           reference_id: "item1",
+  //           description: "Watch",
+  //           amount: {
+  //             value: "2.00",
+  //           },
+  //         },
+  //         {
+  //           reference_id: "item2",
+  //           description: "GYM",
+  //           amount: {
+  //             value: "3.00",
+  //           },
+  //         },
+  //         {
+  //           reference_id: "item3",
+  //           description: "Pant",
+  //           amount: {
+  //             currency_code: "USD", // Ensure consistent currency code with PayPal's expectations
+  //             value: value, // Update the value with the calculated total amount
+  //             breakdown: {
+  //               item_total: { currency_code: "USD", value: itemTotal.toFixed(2) }, // Base price
+  //               shipping: { currency_code: "USD", value: shipping.toFixed(2) }, // Shipping cost
+  //               handling: { currency_code: "USD", value: handling.toFixed(2) }, // Handling cost
+  //               tax_total: { currency_code: "USD", value: taxTotal.toFixed(2) }, // Tax
+  //               shipping_discount: { currency_code: "USD", value: shippingDiscount.toFixed(2) }, // Shipping discount
+  //               discount: { currency_code: "USD", value: discount.toFixed(2) }, // Discount
+  //               tip: { currency_code: "USD", value: tip.toFixed(2) }, // Tip
+  //             },
+  //           },
+  //         },
+  //       ],
+  //       application_context: {
+  //         shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
+  //         user_action: "PAY_NOW", // Use this to hide Pay Later option
+  //       },
+  //     })
+  //     .then((orderID) => {
+  //       setPaypalOrderID(orderID);
+  //       return orderID;
+  //     });
+  // };
 
   const createOrder = (data, actions) => {
-    return actions.order.create({
-      purchase_units: [
-        {
-          amount: {
-            value: "1.00", // Update with your actual amount
+    return actions.order
+      .create({
+        purchase_units: [
+          {
+            reference_id: "item1",
+            description: "Watch",
+            amount: {
+              currency_code: "USD",
+              value: "2.00",
+            },
+            shipping: {
+              name: {
+                full_name: "John Doe",
+              },
+              address: {
+                address_line_1: "123 Shipping St",
+                admin_area_2: "City",
+                admin_area_1: "State",
+                postal_code: "12345",
+                country_code: "US",
+              },
+            },
           },
+          {
+            reference_id: "item2",
+            description: "GYM",
+            amount: {
+              currency_code: "USD",
+              value: "3.00",
+            },
+          },
+          {
+            reference_id: "item3",
+            description: "Pant",
+            amount: {
+              currency_code: "USD",
+              value: 5,
+            },
+          },
+        ],
+        // application_context: {
+        //   shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
+        //   user_action: "PAY_NOW", // Use this to hide Pay Later option
+        // },
+        application_context: {
+          shipping_preference: "GET_FROM_FILE",
+          user_action: "PAY_NOW",
+          brand_name: "ODBHOOTSTORE",
+          return_url: `http://localhost:3000/Payment/success.html?orderNumber=${paypalOrderID}`,
+          cancel_url: "https://example.com/cancel",
         },
-      ],
-      application_context: {
-        shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
-        user_action: "PAY_NOW", // Use this to hide Pay Later option
-      },
-    });
+      })
+      .then((orderID) => {
+        console.log({ orderID });
+        setPaypalOrderID(orderID);
+        return orderID;
+      });
   };
 
   const onApprove = (data, actions) => {
-    return actions.order.capture();
+    return actions.order.capture().then((details) => {
+      const { payer } = details;
+      console.log({ payer, details });
+      setPaypalSuccess(true);
+    });
+  };
+
+  const initialOptions = {
+    clientId: process.env.PAYPAL_CLIENT_ID,
+    currency: "USD",
+    intent: "capture",
   };
 
   return (
@@ -204,15 +312,6 @@ const Payment = ({ cusInfo, total }) => {
                 <CheckoutForm clientSecret={clientSecret} cusInfo={cusInfo} data={{ cardType, setCardType }} />
               </Elements>
             )}
-
-            {/* <Elements options={options} stripe={stripePromise}>
-              <CheckoutForm data={{ cardType, setCardType }} />
-            </Elements> */}
-
-            {/* <Elements stripe={stripePromise} options={ELEMENTS_OPTIONS}>
-              
-              <CheckoutForm data={{ cardType, setCardType }} />
-            </Elements> */}
           </div>
         </AccordionDetails>
       </Accordion>
@@ -239,17 +338,19 @@ const Payment = ({ cusInfo, total }) => {
         //   Pay with <span className="font-bold italic">PayPal</span>
         // </button>
         <div className="my-5">
-          <PayPalButtons
-            style={{
-              color: "blue",
-              layout: "horizontal",
-              label: "pay",
-              height: 40,
-              tagline: false,
-            }}
-            createOrder={createOrder}
-            onApprove={onApprove}
-          />
+          <PayPalScriptProvider options={initialOptions}>
+            <PayPalButtons
+              style={{
+                color: "blue",
+                layout: "horizontal",
+                label: "pay",
+                height: 40,
+                tagline: false,
+              }}
+              createOrder={createOrder}
+              onApprove={onApprove}
+            />
+          </PayPalScriptProvider>
         </div>
       )}
     </div>

@@ -37,8 +37,8 @@ export default function CheckoutForm({ cusInfo }) {
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // return_url: `http://localhost:3000/Payment/success.html?orderNumber=${customer?.orderNumber}&email=${customer?.email}`,
-        return_url: `https://odbhootstore.vercel.app/Payment/success.html?orderNumber=${customer?.orderNumber}&email=${customer?.email}`,
+        return_url: `http://localhost:3000/Payment/success.html?orderNumber=${customer?.orderNumber}&email=${customer?.email}`,
+        // return_url: `https://odbhootstore.vercel.app/Payment/success.html?orderNumber=${customer?.orderNumber}&email=${customer?.email}`,
       },
     });
 
@@ -72,11 +72,6 @@ export default function CheckoutForm({ cusInfo }) {
       <button disabled={isLoading || !stripe || !elements} id="submit" className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">
         {isLoading ? "Paying..." : "Pay now"}
       </button>
-      {/* <button disabled={isLoading || !stripe || !elements} id="submit" className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">
-        Pay Now
-      </button> */}
-
-      {/* Show any error or success messages */}
       {message && <div id="payment-message">{message}</div>}
     </form>
   );
