@@ -4,9 +4,9 @@ import NavBar from '@/Components/Shared-Pages/NavBar'
 import OrderState from '@/Components/State/OrderState'
 import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 import { Inter } from 'next/font/google'
-import Head from 'next/head'
 import Script from 'next/script'
 import React from 'react'
+import { Toaster } from 'react-hot-toast'
 
 // if (typeof window === 'undefined') {
 //   global.window = {};
@@ -14,8 +14,6 @@ import React from 'react'
 
 import { usePathname } from 'next/navigation'
 import './globals.css'
-
-
 
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -61,6 +59,7 @@ export default function RootLayout({ children }) {
 
               <div className='min-h-[80vh]'>
                 {children}
+                <Toaster />
               </div>
               {
                 resultArray[0] != "dashboard" && <Footer />
@@ -68,7 +67,6 @@ export default function RootLayout({ children }) {
             </OrderState>
           </LocalizationProvider>
         </PayPalScriptProvider>
-
       </body>
     </html>
   )

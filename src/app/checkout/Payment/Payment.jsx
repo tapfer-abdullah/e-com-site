@@ -20,7 +20,9 @@ import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import BxGyCart from "../CheckoutCardComponent/BxGyCart";
 import CheckoutForm from "./CheckoutForm";
 
 const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} square {...props} />)(({ theme }) => ({
@@ -124,124 +126,51 @@ const Payment = ({ cusInfo, total }) => {
   //-----------------------------------
   //          PayPal payment          |
   // ----------------------------------
-
   const [paypalSuccess, setPaypalSuccess] = useState(false);
   const [paypalOrderID, setPaypalOrderID] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const createOrder = (data, actions) => {
-    let cartArray = [];
-
-    dataForBxGy.forEach((item) => {
-      data = {
-        reference_id: item.sku,
-        description: item.name,
-        amount: {
-          currency_code: "USD",
-          value: item.price + 10.0,
-          breakdown: {
-            item_total: {
-              currency_code: "USD",
-              value: item.price,
-            },
-            shipping: {
-              currency_code: "USD",
-              value: "10.00",
-            },
-            discount: {
-              currency_code: "USD",
-              value: "0.00",
-            },
-            handling: {
-              currency_code: "USD",
-              value: "0.00", // Handling fee (tips)
-            },
-          },
-        },
-        address: {
-          address_line_1: "123 Shipping St",
-          admin_area_2: "City",
-          admin_area_1: "State",
-          postal_code: "12345",
-          country_code: "US",
-        },
-      };
-      cartArray.push(data);
-    });
-
-    return actions.order
-      .create({
-        purchase_units: cartArray,
-        //   shipping_preference: "NO_SHIPPING", // Use this to hide shipping information
-        application_context: {
-          shipping_preference: "GET_FROM_FILE",
-          user_action: "PAY_NOW",
-          brand_name: "ODBHOOTSTORE",
-          return_url: `http://localhost:3000/Payment/success.html?orderNumber=${paypalOrderID}`,
-          cancel_url: "https://example.com/cancel",
-        },
-      })
-      .then((orderID) => {
-        console.log({ orderID });
-        setPaypalOrderID(orderID);
-        return orderID;
+  const createOrder = async (data, actions) => {
+    return fetch("https://odbhootstore.vercel.app/api/payment/paypal/create-paypal-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ dataForBxGy, shipping, tips }),
+    })
+      .then((response) => response.json())
+      .then((order) => {
+        return order.id;
       });
   };
+  const onApprove = async (data, actions) => {
+    return fetch("https://odbhootstore.vercel.app/api/payment/paypal/capture-paypal-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        orderID: data.orderID,
+      }),
+    })
+      .then((response) => response.json())
+      .then((details) => {
+        const { payer, id } = details;
+        // console.log({ payer, details });
 
-  const onApprove = (data, actions) => {
-    return actions.order.capture().then((details) => {
-      const { payer, id } = details;
-      console.log({ payer, details });
-      setPaypalSuccess(true);
-      // router.push(`http://localhost:3000/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
-      router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
-    });
+        if (details?.status == "COMPLETED") {
+          toast.success("Payment Successful.");
+          setPaypalSuccess(true);
+
+          axiosHttp.post("/confirmationMail", { dataForBxGy, shipping, tips }).then((res) => {
+            console.log(res.data);
+          });
+        }
+
+        // router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
+        //     // router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
+      });
   };
-
-  // const createOrder = async (data, actions) => {
-  //   console.log("create...", { actions });
-  //   // Order is created on the server and the order id is returned
-  //   return fetch("http://localhost:3000/api/payment/paypal/create-paypal-order", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     // use the "body" param to optionally pass additional order information
-  //     // like product skus and quantities
-  //     body: JSON.stringify({
-  //       cart: [
-  //         {
-  //           sku: "YOUR_PRODUCT_STOCK_KEEPING_UNIT",
-  //           quantity: "YOUR_PRODUCT_QUANTITY",
-  //         },
-  //       ],
-  //     }),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((order) => {
-  //       console.log({ order });
-  //       return order.id;
-  //     });
-  // };
-  // const onApprove = async (data, actions) => {
-  //   console.log("capture...");
-  //   // Order is captured on the server and the response is returned to the browser
-  //   return fetch("http://localhost:3000/api/payment/paypal/capture-paypal-order", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       orderID: data.orderID,
-  //     }),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((details) => {
-  //       const { payer } = details;
-  //       console.log({ payer, details });
-  //       setPaypalSuccess(true);
-  //     });
-  // };
 
   const initialOptions = {
     clientId: process.env.PAYPAL_CLIENT_ID,

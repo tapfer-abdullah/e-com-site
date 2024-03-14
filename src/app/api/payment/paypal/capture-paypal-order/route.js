@@ -12,15 +12,14 @@ const baseURL = {
 
 
 export const POST = async (request, { params }) => {
-    const url = request.url;
-    // const data = await request.json();
-
-    const { query } = parse(url, true);
-
-    const searchParams = new URLSearchParams(query);
-    const orderID = searchParams.get('orderID');
+    const { orderID } = await request.json();
 
     const captureData = await capturePayment(orderID);
+
+    // if(captureData.status == "COMPLETED"){
+
+    // }
+
     return NextResponse.json(captureData);
 
 }
