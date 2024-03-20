@@ -14,7 +14,7 @@ import Payment from "./Payment/Payment";
 
 // import PreviewPage from "./Payment/Payment2";
 
-const CheckoutPersonalInfo = ({ total, setTotal, setTips, subTotal, selectedCountry, setSelectedCountry, setEmail, email, cusInfo, setCusInfo }) => {
+const CheckoutPersonalInfo = ({ total, discountCode, setTips, subTotal, selectedCountry, setSelectedCountry, setEmail, email, cusInfo, setCusInfo }) => {
   const { allCountryData } = useContext(OrderStateProvider);
   const [tip, setTip] = useState(null);
   const [tipValue, setTipValue] = useState(null);
@@ -38,12 +38,6 @@ const CheckoutPersonalInfo = ({ total, setTotal, setTips, subTotal, selectedCoun
     setSelectedCountry(value);
     setCusInfo({ ...cusInfo, country: value?.label });
   };
-
-  // const handleCustomTips = (e) => {
-  //   // e.preventDefault();
-  //   // const tip = e.target.customTip.value || 0;
-  //   setTips(parseFloat(tip));
-  // };
 
   return (
     <div className="px-8 overflow-y-scroll max-h-[100vh] no-scrollbar">
@@ -70,7 +64,7 @@ const CheckoutPersonalInfo = ({ total, setTotal, setTips, subTotal, selectedCoun
             id="email"
             className="rounded-md w-full border-2 h-auto"
             // label={!email && "Email"}
-            placeholder="Email"
+            placeholder="Email *"
           />
           {email && <p className="absolute -top-[10px] left-4 px-1 text-sm bg-white text-gray-500">Email *</p>}
         </div>
@@ -238,7 +232,7 @@ const CheckoutPersonalInfo = ({ total, setTotal, setTips, subTotal, selectedCoun
       </div>
 
       {/* Payment options */}
-      <Payment cusInfo={cusInfo} total={total} />
+      <Payment cusInfo={cusInfo} total={total} discountCode={discountCode} />
       {/* <button className="text-xl text-white font-semibold p-2 my-5 w-full bg-black rounded-md hover:bg-opacity-70 transition-all duration-300">Pay Now</button> */}
     </div>
   );

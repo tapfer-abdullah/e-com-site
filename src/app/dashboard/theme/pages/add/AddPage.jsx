@@ -27,7 +27,7 @@ const AddPage = () => {
   const handleChange = (event) => {
     setChecked(event.target.checked);
   };
-
+  // console.log(content)
   const handleSave = () => {
     if (!title || !visibility || !position || !content) {
       setError("Form is incomplete!");

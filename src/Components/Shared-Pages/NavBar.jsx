@@ -14,7 +14,7 @@ const NavBar = () => {
   const [type, setType] = useState([]);
   const [navLinks, setNavLinks] = useState([]);
 
-  const { cartData } = useContext(OrderStateProvider);
+  const { cartData, dataForBxGy } = useContext(OrderStateProvider);
 
   useEffect(() => {
     axiosHttp.get("/nav-links").then((res) => {
@@ -69,7 +69,7 @@ const NavBar = () => {
               <IoIosSearch className="text-4xl" />
             </Link>
             <button className="relative">
-              <span className="absolute -top-3 -right-3 bg-red-500 rounded-full py-[2px] px-[8px] text-sm">{cartData?.length || 0}</span>
+              <span className="absolute -top-3 -right-3 bg-red-500 rounded-full py-[2px] px-[8px] text-sm">{dataForBxGy?.length || 0}</span>
               <AiOutlineShopping
                 onClick={() => {
                   setPositionInfo({ right: "zeroRight", customOpacity: 70 });

@@ -2,6 +2,7 @@
 import { OrderStateProvider } from "@/Components/State/OrderState";
 import { Autocomplete, Avatar, Box, MenuItem, Modal, TextField } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import { axiosHttp } from "../helper/axiosHttp";
 import CheckoutPersonalInfo from "./CheckoutPersonalInfo";
@@ -20,7 +21,7 @@ const style = {
 };
 
 const CheckoutPage = () => {
-  const { customer, setCustomer, dataForBxGy, promoCode, setPromoCode, allCountryData } = useContext(OrderStateProvider);
+  const { customer, cartData, setCustomer, dataForBxGy, promoCode, setPromoCode, allCountryData, finalCartData, setFinalCartData } = useContext(OrderStateProvider);
   const [tip, setTip] = useState(0);
   const [subTotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
@@ -28,18 +29,12 @@ const CheckoutPage = () => {
 
   const [disError, setDisError] = useState("");
   const [discountCode, setDiscountCode] = useState("");
-  const [discountOn, setDiscountOn] = useState("");
-  const [discountOnValue, setDiscountOnValue] = useState([]);
-  const [amountToBeReduce, setAmountToBeReduce] = useState(0);
-  const [minusAmount, setMinusAmount] = useState(0);
+
   const [discountType, setDiscountType] = useState("");
   const [disAdditionalType, setDisAdditionalType] = useState("");
   // buy x get y
   const [BxGyCartArray, setBxGyCartArray] = useState([]);
-  const [BuyOnOption, setBuyOnOption] = useState("");
-  const [BuyOnValue, setBuyOnValue] = useState([]);
-  const [BxGyMaxUsesPerOrder, setBxGyMaxUsesPerOrder] = useState(100);
-  const [discountTypeValue, setDiscountTypeValue] = useState(0);
+
   const [discountInput, setDiscountInput] = useState("");
   const [isLoading, setLoading] = useState(false);
 
@@ -69,375 +64,174 @@ const CheckoutPage = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const [discountedAmount, setDiscountedAmount] = useState(0);
+  // const [finalCartData, setFinalCartData] = useState(cartData || []);
+
+  useEffect(() => {
+    let sum = 0;
+    let discount = 0;
+    let quantity = 0;
+
+    if (finalCartData.length > 0) {
+      for (let i = 0; i < finalCartData.length; i++) {
+        sum += finalCartData[i].price * finalCartData[i].quantity;
+        discount += finalCartData[i].discount * finalCartData[i].quantity;
+        quantity += finalCartData[i].quantity;
+      }
+      // setFinalCartData(cartData);
+    } else {
+      setFinalCartData(cartData);
+      for (let i = 0; i < cartData.length; i++) {
+        sum += cartData[i].price * cartData[i].quantity;
+        discount += cartData[i].discount * cartData[i].quantity;
+        quantity += cartData[i].quantity;
+      }
+    }
+
+    setSubtotal(sum);
+    setQuantity(quantity);
+    if (disAdditionalType !== "AOffO") {
+      setDiscountedAmount(discount);
+    }
+    console.log({ discountedAmount, finalCartData });
+  }, [isLoading, disError, finalCartData.length, cartData, discountCode, tip, shippingAmount, setSubtotal, setQuantity, disAdditionalType, discountedAmount, finalCartData]);
+
   const handleCountryChange = (event, value) => {
     setSelectedCountry(value);
   };
 
   const handleDiscountCode = (code) => {
+    setPromoCode("");
     setLoading(true);
+
     if (!code) {
-      setLoading(false);
-      setPromoCode("");
       setDiscountCode("");
+      setCusInfo.discountCode = "";
       setDisError("Discount field is empty!");
-      setDisAdditionalType("empty");
+      setDisAdditionalType("");
+      setFinalCartData(cartData);
+      setLoading(false);
       return;
     }
-    setPromoCode(code);
-    axiosHttp.patch(`/discount`, { title: code }).then((res) => {
+
+    // setFinalCartData([]);
+    axiosHttp.patch(`/discount`, { dataForBxGy, shipping, tip, discountCode: code, email, selectedCountry }).then(async (res) => {
       const response = res.data;
+      // console.log({ response });
 
-      if (response?.status) {
-        setDiscountInput("");
-        setDisError("");
-        const validCode = res.data?.data;
-        // console.log(validCode);
+      if (response.issue == "invalid") {
+        toast.error(response?.message);
+        setDisError(response?.message);
+        setDiscountCode("");
+        setCusInfo.discountCode = "";
+        setFinalCartData(cartData);
+        return;
+      }
 
-        if (validCode?.eligibility?.option != "all") {
-          // to do
+      setDiscountCode(code);
+      setCusInfo.discountCode = code;
+      setDisAdditionalType(response?.discountType);
+      switch (response?.discountType) {
+        case "BxGy": {
+          if (response?.issue == "passed") {
+            setDiscountCode(code);
+            setCusInfo.discountCode = code;
+            setDisError("");
+            setDiscountInput("");
+            setFinalCartData(response.data);
+            toast.success("Discount code applied successfully");
+          } else {
+            toast.error(response?.message);
+            setDisError(response?.message);
+            setDiscountCode(code);
+            setCusInfo.discountCode = code;
+            setFinalCartData(cartData);
+          }
+          break;
         }
-
-        if (validCode?.limitDisOnePerUse) {
-          if (!email) {
-            setDiscountCode("");
+        case "AOffP": {
+          if (response?.issue == "passed") {
+            setFinalCartData(response.data);
+            toast.success("Discount code applied successfully");
+            setDiscountCode(code);
+            setCusInfo.discountCode = code;
+            setDisError("");
+            setDiscountInput("");
+          } else {
+            toast.error(response?.message);
+            setDisError(response?.message);
+            setDiscountCode(code);
+            setCusInfo.discountCode = code;
+            setFinalCartData(cartData);
+          }
+          break;
+        }
+        case "AOffO": {
+          if (response?.issue == "passed") {
+            setFinalCartData(cartData);
+            // console.log({ data: response.data });
+            if (response.data.type == "Percentage") {
+              let moneyToBeSubtract = subTotal * (parseInt(response.data.amount) / 100);
+              setDiscountedAmount(moneyToBeSubtract);
+              toast.success("Discount code applied successfully");
+              setDiscountCode(code);
+              setCusInfo.discountCode = code;
+              setDisError("");
+              setDiscountInput("");
+            } else if (response.data.type == "Fixed") {
+              setDiscountedAmount(parseInt(response.data.amount));
+              toast.success("Discount code applied successfully");
+              setDiscountCode(code);
+              setCusInfo.discountCode = code;
+              setDisError("");
+              setDiscountInput("");
+            } else {
+              toast.error(response?.message);
+              setDisError(response?.message);
+              setDiscountCode(code);
+              setCusInfo.discountCode = code;
+            }
+          }
+          break;
+        }
+        case "FS": {
+          setFinalCartData(cartData);
+          if (response?.issue == "passed") {
+            toast.success("Discount code applied successfully");
+            setDiscountCode(code);
+            setCusInfo.discountCode = code;
+            setDisError("");
+            setDiscountInput("");
+            // setShippingAmount(0);
+          } else if (response?.issue == "failed") {
+            setDisError(response.message);
+            Swal.fire({
+              title: "Failed",
+              text: response?.message,
+              icon: "error",
+            });
+          } else if (response?.issue == "!country") {
+            setDisError(response.message);
             return Swal.fire({
-              title: "Email require!",
-              text: `Email is required for "${code}" discount code.`,
+              title: "Country require!",
+              text: response.message,
               icon: "error",
               showCancelButton: true,
               confirmButtonColor: "#3085d6",
               cancelButtonColor: "#d33",
-              confirmButtonText: "Enter email?",
-            }).then(async (result) => {
-              if (result.isConfirmed) {
-                const { value: email } = await Swal.fire({
-                  title: "Enter email",
-                  input: "email",
-                  inputLabel: "Your email address",
-                  inputPlaceholder: "Enter your email address",
-                });
-                if (email) {
-                  setEmail(email);
-                  Swal.fire({
-                    title: `Entered email: ${email}`,
-                    text: "Use the discount code again!",
-                    icon: "success",
-                  });
-                }
+              confirmButtonText: "Enter country?",
+            }).then(async (result2) => {
+              // console.log({ result2 });
+              if (result2.isConfirmed) {
+                handleOpen();
+              } else {
+                setDiscountCode(code);
+                setCusInfo.discountCode = code;
               }
             });
-          } else {
-            // to do validate if he/she used the code before
           }
+          break;
         }
-        if (validCode?.maxDisCodeUse?.option) {
-          // to do
-        }
-
-        if (validCode?.minPurRequirement?.option != "no") {
-          if (validCode?.minPurRequirement?.option == "amount" && parseInt(validCode?.minPurRequirement?.value) > subTotal) {
-            setDisError(`Subtotal must be more than € ${validCode?.minPurRequirement?.value}`);
-            setDiscountCode("");
-            setAmountToBeReduce(0);
-            return;
-          } else if (validCode?.minPurRequirement?.option == "percentage" && parseInt(validCode?.minPurRequirement?.value) > quantity) {
-            setDisError(`Items must be more than ${validCode?.minPurRequirement?.value}`);
-            setDiscountCode("");
-            setAmountToBeReduce(0);
-            return;
-          }
-        }
-
-        const type = validCode?.discountCodeType;
-        setDisAdditionalType(type);
-
-        switch (type) {
-          case "BxGy": {
-            const data = validCode?.additionalData?.BxGy;
-            setDiscountType(data?.DiscountedType.option);
-            setDiscountTypeValue(parseInt(data?.DiscountedType.value));
-            setDiscountOn(data?.Get?.option);
-            setBuyOnOption(data?.Buy?.option);
-
-            // console.log({ data });
-
-            let BxGyMaxUsesPerOrder2 = 0;
-            if (data?.MaxUser?.option) {
-              setBxGyMaxUsesPerOrder(parseInt(data?.MaxUser?.value));
-              BxGyMaxUsesPerOrder2 = parseInt(data?.MaxUser?.value);
-            } else {
-              setBxGyMaxUsesPerOrder(1000);
-              BxGyMaxUsesPerOrder2 = parseInt(1000);
-            }
-
-            let selectedArrayBuy = [];
-            let selectedArrayGet = [];
-            if (data?.Buy?.option == "category") {
-              for (let d of data?.Buy?.value) {
-                selectedArrayBuy.push(d?.label?.toLowerCase());
-              }
-            } else {
-              for (let d of data?.Buy?.value) {
-                selectedArrayBuy.push(d?.value);
-              }
-            }
-
-            if (data?.Get?.option == "category") {
-              for (let d of data?.Get?.value) {
-                selectedArrayGet.push(d?.label?.toLowerCase());
-              }
-            } else {
-              for (let d of data?.Get?.value) {
-                selectedArrayGet.push(d?.value);
-              }
-            }
-
-            // BxGy shopping cart all calculation and data-----------------------------------------
-            let approvedGetArray2 = [];
-            let approvedBuyArray2 = [];
-            let approvedBuyCount2 = 0;
-
-            dataForBxGy
-              ?.sort((a, b) => a.price - b.price)
-              ?.map((sp) => {
-                if (data?.Get?.option === "products") {
-                  if (selectedArrayGet.includes(sp?.id)) {
-                    approvedGetArray2.push(sp?.id);
-                  }
-                } else if (data?.Get?.option === "category") {
-                  if (selectedArrayGet.includes(sp?.category?.toLowerCase())) {
-                    approvedGetArray2.push(sp?.id);
-                  }
-                }
-
-                //buy
-                if (data?.Buy?.option === "products") {
-                  if (selectedArrayBuy.includes(sp?.id)) {
-                    approvedBuyArray2.push(sp?.id);
-                    approvedBuyCount2 += sp?.quantity;
-                  }
-                } else if (data?.Buy?.option === "category") {
-                  if (selectedArrayBuy.includes(sp?.category?.toLowerCase())) {
-                    approvedBuyArray2.push(sp?.id);
-                    approvedBuyCount2 += sp?.quantity;
-                  }
-                }
-              });
-
-            function findCommonValues(array1, array2) {
-              let commonValues = [];
-              for (let i = 0; i < array1.length; i++) {
-                if (array2.includes(array1[i])) {
-                  commonValues.push(array1[i]);
-                }
-              }
-              return commonValues;
-            }
-
-            let reqBuy = parseInt(data?.CusBuyAmount),
-              reqGet = parseInt(data?.CusGetAmount),
-              aBuy = approvedBuyArray2?.length,
-              aGet = approvedGetArray2?.length,
-              common = 0,
-              total = 0,
-              i = 0;
-
-            common = findCommonValues(approvedGetArray2, approvedBuyArray2);
-            total = approvedBuyArray2?.length + approvedGetArray2?.length - common?.length;
-
-            let Buy = 0,
-              Free = 0;
-
-            if (data?.BxGyType == "buys") {
-              for (i = 1; i <= total && i * reqBuy <= aBuy && i * reqGet <= aGet; i++) {
-                if (i * reqBuy + i * reqGet <= total) {
-                  Free = i * reqGet;
-                  Buy = i * reqBuy;
-                } else {
-                  break;
-                }
-              }
-
-              if (reqGet > reqBuy && Buy < aBuy && Free < aGet) {
-                if (aGet < i * reqGet && i * reqBuy + i * reqGet - (aGet - Free) < total) {
-                  // console.log("if-2", { Free });
-                  Free = aGet;
-                  Buy = total - Free;
-                }
-              } else {
-                Buy = total - Free;
-              }
-
-              let cusShouldGet = Free;
-              let reduce = 0;
-              let updatedBxByArray = [];
-              if (data?.DiscountedType.option === "free") {
-                for (let i = 0, j = 0; i < dataForBxGy.length; i++) {
-                  if (approvedGetArray2?.includes(dataForBxGy?.[i]?.id) && j < cusShouldGet && j < BxGyMaxUsesPerOrder2) {
-                    j++;
-                    reduce += dataForBxGy[i]?.price;
-                    let arrayObj = { ...dataForBxGy[i] };
-                    arrayObj.discountCode = code;
-                    arrayObj.reducedAmount = dataForBxGy[i]?.price;
-                    updatedBxByArray.push(arrayObj);
-                  } else {
-                    let arrayObj = { ...dataForBxGy[i] };
-                    updatedBxByArray.push(arrayObj);
-                  }
-                }
-              } else if (data?.DiscountedType.option == "percentage") {
-                for (let i = 0, j = 0; i < dataForBxGy.length; i++) {
-                  if (approvedGetArray2?.includes(dataForBxGy?.[i]?.id) && j < cusShouldGet && j < BxGyMaxUsesPerOrder2) {
-                    j++;
-                    reduce += (dataForBxGy[i]?.price * parseInt(data?.DiscountedType.value)) / 100;
-                    let arrayObj = { ...dataForBxGy[i] };
-                    arrayObj.discountCode = code;
-                    arrayObj.reducedAmount = (dataForBxGy[i]?.price * parseInt(data?.DiscountedType.value)) / 100;
-                    updatedBxByArray.push(arrayObj);
-                  } else {
-                    let arrayObj = { ...dataForBxGy[i] };
-                    updatedBxByArray.push(arrayObj);
-                  }
-                }
-              } else if (data?.DiscountedType.option == "amount") {
-                for (let i = 0, j = 0; i < dataForBxGy.length; i++) {
-                  if (approvedGetArray2?.includes(dataForBxGy?.[i]?.id) && j < cusShouldGet && j < BxGyMaxUsesPerOrder2) {
-                    j++;
-                    reduce += parseInt(data?.DiscountedType.value);
-                    let arrayObj = { ...dataForBxGy[i] };
-                    arrayObj.discountCode = code;
-                    arrayObj.reducedAmount = parseInt(data?.DiscountedType.value);
-                    updatedBxByArray.push(arrayObj);
-                  } else {
-                    let arrayObj = { ...dataForBxGy[i] };
-                    updatedBxByArray.push(arrayObj);
-                  }
-                }
-              }
-
-              setMinusAmount(reduce);
-              setBxGyCartArray(updatedBxByArray);
-            }
-            // else {
-            // }
-
-            setDiscountCode(code);
-            setDiscountOnValue(selectedArrayGet);
-            setBuyOnValue(selectedArrayBuy);
-            break;
-          }
-
-          case "AOffP": {
-            const data = validCode?.additionalData?.AOffP;
-            setDiscountOn(data?.ApplyTo?.option);
-
-            let selectedArray = [];
-            if (data?.ApplyTo?.option == "category") {
-              for (let d of data?.ApplyTo?.value) {
-                selectedArray.push(d?.label?.toLowerCase());
-              }
-            } else {
-              for (let d of data?.ApplyTo?.value) {
-                selectedArray.push(d?.value);
-              }
-            }
-            setDiscountType(data?.DiscountedType.option);
-            setAmountToBeReduce(parseInt(data?.DiscountedType.value));
-            setDiscountCode(code);
-            setDiscountOnValue(selectedArray);
-            break;
-          }
-          case "AOffO": {
-            const data = validCode?.additionalData?.AOffO?.DiscountedType;
-            if (data?.option == "Fixed") {
-              setDiscountType(data?.option);
-              setAmountToBeReduce(parseInt(data?.value));
-              setDiscountCode(code);
-            } else {
-              setDiscountType(data?.option);
-              setAmountToBeReduce(parseInt(data?.value));
-              setDiscountCode(code);
-            }
-            break;
-          }
-          case "FS": {
-            const data = validCode?.additionalData?.FS;
-            if (data?.freeShipping?.option == "specific") {
-              //all
-              // console.log({ all: data?.freeShipping?.value, selectedCountry });
-              if (!selectedCountry) {
-                return Swal.fire({
-                  title: "Country require!",
-                  text: `Country is required for "${code}" discount code.`,
-                  icon: "error",
-                  showCancelButton: true,
-                  confirmButtonColor: "#3085d6",
-                  cancelButtonColor: "#d33",
-                  confirmButtonText: "Enter country?",
-                }).then(async (result2) => {
-                  // console.log({ result2 });
-                  if (result2.isConfirmed) {
-                    handleOpen();
-                  } else {
-                    setDiscountCode("");
-                  }
-                });
-              } else {
-                let isFree = 0;
-                for (let country of data?.freeShipping?.value) {
-                  if (selectedCountry?.label == country?.label) {
-                    isFree++;
-                    break;
-                  }
-                }
-                if (isFree > 0) {
-                  setShipping("free");
-                  setMinusAmount(shippingAmount);
-                  if (data?.shippingRate?.option) {
-                    if (subTotal >= parseInt(data?.shippingRate?.value)) {
-                      setShipping("free");
-                      setMinusAmount(shippingAmount);
-                      setDisError("");
-                    } else {
-                      setShipping("not-free");
-                      setDisError("");
-                      setMinusAmount(0);
-                      setShippingReqAmount(parseInt(data?.shippingRate?.value));
-                    }
-                  }
-                } else {
-                  setMinusAmount(0);
-                  setShipping("not");
-                  setDisError("Free shipping is not available in your country!");
-                }
-              }
-            } else {
-              setShipping("free");
-              setMinusAmount(shippingAmount);
-              setDisError("");
-              if (data?.shippingRate?.option) {
-                if (subTotal >= parseInt(data?.shippingRate?.value)) {
-                  setShipping("free");
-                  setMinusAmount(shippingAmount);
-                  setDisError("");
-                } else {
-                  setShipping("not-free");
-                  setDisError("");
-                  setMinusAmount(0);
-                  setShippingReqAmount(parseInt(data?.shippingRate?.value));
-                }
-              }
-            }
-            break;
-          }
-        }
-      } else {
-        setDisError(response?.message);
-        setDiscountCode("");
-        setAmountToBeReduce(0);
-        setMinusAmount(0);
-        setDisAdditionalType("");
-        setLoading(false);
       }
     });
     setLoading(false);
@@ -459,7 +253,7 @@ const CheckoutPage = () => {
     }
 
     let cardID = localStorage.getItem("obs-card-id");
-    console.log({ cardID });
+    // console.log({ cardID });
 
     if (isValidEmail(cusInfo?.email)) {
       cusInfo.discountCode = discountCode;
@@ -526,8 +320,11 @@ const CheckoutPage = () => {
             setSelectedCountry={setSelectedCountry}
             total={total}
             setTotal={setTotal}
+            discountCode={discountCode}
           />
           <CheckoutProductsInfo
+            // finalCartData={finalCartData}
+            discountedAmount={discountedAmount}
             total={total}
             setTotal={setTotal}
             email={email}
@@ -538,19 +335,9 @@ const CheckoutPage = () => {
             setSubtotal={setSubtotal}
             setQuantity={setQuantity}
             disError={disError}
-            amountToBeReduce={amountToBeReduce}
             discountCode={discountCode}
-            discountOn={discountOn}
-            discountOnValue={discountOnValue}
             discountType={discountType}
-            minusAmount={minusAmount}
-            setMinusAmount={setMinusAmount}
             disAdditionalType={disAdditionalType}
-            BuyOnOption={BuyOnOption}
-            BuyOnValue={BuyOnValue}
-            discountTypeValue={discountTypeValue}
-            BxGyMaxUsesPerOrder={BxGyMaxUsesPerOrder}
-            BxGyCartArray={BxGyCartArray}
             discountInput={discountInput}
             setDiscountInput={setDiscountInput}
             isLoading={isLoading}

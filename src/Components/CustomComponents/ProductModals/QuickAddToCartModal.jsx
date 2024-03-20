@@ -38,6 +38,7 @@ const QuickAddToCartModal = ({ singleProduct, QuickShop, SetQuickShop }) => {
       quantity: 1,
       sku: sku,
       img: img,
+      discount: 0.0,
     };
     // console.log(data, singleProduct);
 
@@ -63,6 +64,7 @@ const QuickAddToCartModal = ({ singleProduct, QuickShop, SetQuickShop }) => {
             quantity: storedData?.[i]?.quantity + 1,
             sku: sku,
             img: img,
+            discount: 0.0,
           });
         } else {
           newData.push(storedData[i]);

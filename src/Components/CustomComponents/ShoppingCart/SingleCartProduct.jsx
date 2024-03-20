@@ -10,7 +10,7 @@ const SingleCartProduct = ({ index, data, handleQuantity, handleDelete, setActio
   const [selectedItems, setSelectedItems] = useState(data?.quantity || 1);
   return (
     <div className="relative flex justify-between items-center space-x-4 my-3">
-      <img src={data?.img} alt="product img" className="w-20 h-24" />
+      <img src={data?.img} alt="product img" className="!w-20 !h-20 rounded-md" />
       <div className="flex flex-col gap-1 items-start flex-grow">
         <h4 className="text-md">{data?.name}</h4>
         <p className="text-sm text-gray-500 capitalize">

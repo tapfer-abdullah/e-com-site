@@ -31,6 +31,7 @@ const IDWiseDetails = ({ singleProduct, selectedSKU, imgIndex, setImgIndex, hand
       quantity: selectedItems,
       sku: sku,
       img: img,
+      discount: 0.0,
     };
 
     let storedData = JSON.parse(localStorage.getItem("obs-cart")) || [];
@@ -55,6 +56,7 @@ const IDWiseDetails = ({ singleProduct, selectedSKU, imgIndex, setImgIndex, hand
             quantity: selectedItems,
             sku: sku,
             img: img,
+            discount: 0.0,
           });
         } else {
           newData.push(storedData[i]);

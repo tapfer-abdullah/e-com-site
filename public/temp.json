@@ -1,0 +1,115 @@
+{
+    "_id": "65a83b12cc8c76ef87dbd5f7",
+    "title": "2for1",
+    "discountCodeType": "BxGy",
+    "status": {
+        "label": "Active",
+        "value": "Active",
+        "_id": "65a83b12cc8c76ef87dbd5f8"
+    },
+    "eligibility": {
+        "option": "all",
+        "value": "all",
+        "_id": "65f4da445aad193b211d9ca6"
+    },
+    "limitDisOnePerUse": false,
+    "maxDisCodeUse": {
+        "option": false,
+        "value": "0",
+        "_id": "65f4da445aad193b211d9ca7"
+    },
+    "minPurRequirement": {
+        "option": "no",
+        "value": "0",
+        "_id": "65f4da445aad193b211d9ca5"
+    },
+    "isEndTime": false,
+    "startDate": {
+        "year": "2024",
+        "month": "1",
+        "Day": "18",
+        "_id": "65f4da445aad193b211d9ca8"
+    },
+    "EndDate": {
+        "year": "2024",
+        "month": "01",
+        "Day": "18",
+        "_id": "65f4da445aad193b211d9caa"
+    },
+    "startTime": {
+        "hour": "14",
+        "min": "0",
+        "_id": "65f4da445aad193b211d9ca9"
+    },
+    "EndTime": {
+        "hour": "02",
+        "min": "38",
+        "_id": "65f4da445aad193b211d9cab"
+    },
+    "additionalData": {
+        "BxGy": {
+            "Buy": {
+                "option": "products",
+                "value": [
+                    {
+                        "label": "Jogging Pants With Pocket",
+                        "value": "65913b9a355c379e32cbe7ce",
+                        "imageUrl": "https://i.ibb.co/6RbQwCS/pink.webp",
+                        "_id": "65f4b8223217341ed73ae729"
+                    },
+                    {
+                        "label": "Leopard Print Leggings",
+                        "value": "65dc3b0fc768c4d1e78e9520",
+                        "imageUrl": "https://i.ibb.co/XDhFPNF/g2.webp",
+                        "_id": "65f4b8223217341ed73ae72a"
+                    }
+                ],
+                "_id": "65f4da445aad193b211d9cae"
+            },
+            "Get": {
+                "option": "category",
+                "value": [
+                    {
+                        "label": "Necklace",
+                        "value": "659552357270e55369ac92f2",
+                        "imageUrl": "https://i.ibb.co/YkZY9Z9/b1.webp",
+                        "_id": "65affe14ac96d3287bf58e7f"
+                    },
+                    {
+                        "label": "Gym",
+                        "value": "65956e8e7270e55369aca315",
+                        "imageUrl": "https://i.ibb.co/3SxtrBv/blue.webp",
+                        "_id": "65f4da445aad193b211d9cb3"
+                    }
+                ],
+                "_id": "65f4da445aad193b211d9cb1"
+            },
+            "BxGyType": "spends",
+            "CusBuyAmount": "1",
+            "CusGetAmount": "3",
+            "DiscountedType": {
+                "option": "free",
+                "value": "0",
+                "_id": "65f4da445aad193b211d9cb4"
+            },
+            "MaxUser": {
+                "option": false,
+                "value": "0",
+                "_id": "65f4da445aad193b211d9cb5"
+            },
+            "_id": "65f4da445aad193b211d9cad"
+        },
+        "AOffP": {
+            "_id": "65f4da445aad193b211d9cb6"
+        },
+        "AOffO": {
+            "_id": "65f4da445aad193b211d9cb7"
+        },
+        "FS": {
+            "_id": "65f4da445aad193b211d9cb8"
+        },
+        "_id": "65f4da445aad193b211d9cac"
+    },
+    "__v": 0,
+    "used": 0
+}
