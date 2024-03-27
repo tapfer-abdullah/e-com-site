@@ -3,6 +3,7 @@ import { OrderStateProvider } from "@/Components/State/OrderState";
 import { axiosHttp } from "@/app/helper/axiosHttp";
 // import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const PaymentSuccessPage = () => {
   const { customer, setCustomer } = useContext(OrderStateProvider);
@@ -10,7 +11,7 @@ const PaymentSuccessPage = () => {
   // const router = useRouter();
   const [paymentIntentClientSecret, setPaymentIntentClientSecret] = useState("");
   const [email, setEmail] = useState("");
-  const [orderNumber, setOrderNumber] = useState("");
+  const [orderID, setOrderID] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -20,18 +21,25 @@ const PaymentSuccessPage = () => {
       const payment_intent_client_secret = urlParams.get("payment_intent_client_secret");
       setPayment_intent(payment_intent);
       setEmail(urlParams.get("email"));
-      setOrderNumber(urlParams.get("orderNumber"));
+      setOrderID(urlParams.get("orderID"));
 
       const clientSecret = new URLSearchParams(window.location.search).get("payment_intent_client_secret");
       let cardID = localStorage.getItem("obs-card-id");
 
-      if (clientSecret && email && orderNumber) {
+      // console.log({ clientSecret, email, orderID });
+
+      if (clientSecret && email && orderID) {
         setPaymentIntentClientSecret(clientSecret);
         axiosHttp
-          // .get(`/payment/get-payment-details?client_secret=${payment_intent}`)
-          .post(`/payment/success?client_secret=${payment_intent}`, { email, orderNumber, cardID })
+          .post(`/payment/success?client_secret=${payment_intent}`, { email, orderID, cardID, payment_method: "Card" })
           .then((response) => {
-            // console.log(response.data);
+            console.log(response.data);
+
+            axiosHttp.post("/confirmationMail", { cardID, orderID: customer?.orderID }).then((res) => {
+              toast.success("Order confirmation mail has been sended!");
+              console.log(res.data);
+            });
+
             localStorage.setItem("obs-card-id", "undefined");
           })
           .catch((error) => {
@@ -43,7 +51,7 @@ const PaymentSuccessPage = () => {
       //   router.push("/"); // Redirect to home or an error page
       // }
     }
-  }, [orderNumber, email]);
+  }, [orderID, email]);
 
   //   console.log(payment_intent);
 
@@ -51,7 +59,7 @@ const PaymentSuccessPage = () => {
     <div>
       <h3>Payment successful</h3>
       <p>Transaction ID: {payment_intent}</p>
-      <p>Order Number: {orderNumber}</p>
+      <p>Order Number: {orderID}</p>
       <p>Email: {email}</p>
     </div>
   );

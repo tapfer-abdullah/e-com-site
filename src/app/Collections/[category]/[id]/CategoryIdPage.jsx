@@ -28,6 +28,7 @@ const CategoryIdPage = () => {
     axiosHttp.get(`/products/${resultArray[2]}`).then((res) => {
       setSingleProduct(res.data);
       setLoading(false);
+      console.log({ data: res.data });
     });
   }, []);
 

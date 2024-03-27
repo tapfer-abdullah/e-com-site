@@ -33,10 +33,11 @@ const CheckoutProductsInfo = ({
 }) => {
   const { cartData, finalCartData } = useContext(OrderStateProvider);
 
-  console.log({ finalCartData });
+  // console.log({ finalCartData });
 
   return (
-    <div className="bg-[#f5f5f5] -mt-5 p-10 border-l-2">
+    // <div className="bg-[#f5f5f5] -mt-5 p-10 border-l-2">
+    <div className="p-10 product-info">
       {finalCartData.length > 0 ? finalCartData.map((sp, index) => <CheckoutPageShoppingCart key={sp.sku + index} disError={disError} sp={sp} discountCode={discountCode} />) : <div>Empty cart!</div>}
       <div className="relative mt-7">
         <input

@@ -40,7 +40,8 @@ const CheckoutPersonalInfo = ({ total, discountCode, setTips, subTotal, selected
   };
 
   return (
-    <div className="px-8 overflow-y-scroll max-h-[100vh] no-scrollbar">
+    // <div className="px-8 overflow-y-scroll max-h-[100vh] no-scrollbar">
+    <div className="px-8">
       {/* <form className="px-8 "> */}
       <div className="space-y-2">
         <div className="flex justify-between items-center my-2">
@@ -53,11 +54,14 @@ const CheckoutPersonalInfo = ({ total, discountCode, setTips, subTotal, selected
 
         <div className="relative">
           <TextField
-            value={email}
-            onChange={(e) => {
+            defaultValue={email}
+            // onChange={(e) => {
+            //   setEmail(e.target.value);
+            // }}
+            onBlur={(e) => {
               setEmail(e.target.value);
+              setCusInfo({ ...cusInfo, email: e.target.value });
             }}
-            onBlur={(e) => setCusInfo({ ...cusInfo, email: e.target.value })}
             required
             type="email"
             name="email"

@@ -1,4 +1,5 @@
 import { CustomerSchema } from "@/app/models/customerInfo";
+import { DiscountSchema } from "@/app/models/discountCode";
 import { OrderSchema } from "@/app/models/order";
 import { NextResponse } from "next/server";
 
@@ -22,11 +23,11 @@ export const GET = async (request) => {
 
 
 
-const calculateOrderAmount = (items, shipping = 0) => {
+const calculateOrderAmount = (items, otherAmount = 0) => {
 
     const sum = items.reduce((accumulator, currentItem) => {
-        return accumulator + (currentItem.price * currentItem.quantity);
-    }, shipping);
+        return accumulator + ((currentItem.price - currentItem.discount) * currentItem.quantity);
+    }, otherAmount);
 
     return sum;
 };
@@ -35,8 +36,8 @@ export const POST = async (request) => {
     function generateRandomOrderNumber() {
         const randomComponent = Math.floor(Math.random() * 10000);
         const timestamp = new Date().getTime();
-        const orderNumber = `${timestamp}${randomComponent}`;
-        return orderNumber;
+        const orderID = `${timestamp}${randomComponent}`;
+        return orderID;
     }
 
     const currentDate = new Date();
@@ -48,27 +49,18 @@ export const POST = async (request) => {
 
     const formattedDate = `${day}-${month}-${year}`;
     const formattedTime = `${hours}:${minutes}`;
-    let orderNumber = generateRandomOrderNumber();
+    let orderID = generateRandomOrderNumber();
 
+    const { cusInfo, cart } = await request.json();
+    const { discountCode, tips, shipping, country, email, discountedAmount } = cusInfo;
 
+    let otherAmount = (tips + shipping);
+    let totalAmount = calculateOrderAmount(cart, otherAmount);
 
-    const { cusInfo, cart, amount } = await request.json();
-    // console.log("clicked......", cusInfo)
-
-    let totalAmount = 0;
-    if (cusInfo?.discountCode) {
-        // to do: discount code validate and calculation 
-        totalAmount = amount;
-    }
-    else {
-        totalAmount = calculateOrderAmount(cart, cusInfo?.shipping || 0);
-        totalAmount += cusInfo?.tips;
-        // console.log({ totalAmount })
-    }
 
     let cartProduct = [];
     cart?.forEach(element => {
-        cartProduct.push({ productID: element?.id, sku: element?.sku, quantity: element?.quantity, discountAmount: element?.discountAmount || 0 });
+        cartProduct.push({ productID: element?.id, sku: element?.sku, quantity: element?.quantity, discountAmount: element?.discount || 0 });
     });
 
     let orderData = {
@@ -79,9 +71,14 @@ export const POST = async (request) => {
         status: "abandoned",
         date: formattedDate,
         time: formattedTime,
-        orderNumber: `abn${orderNumber}`,
+        orderID: `A${orderID}`,
+        orderNumber: `#1001`,
+        orderTrackingNumber: "",
         cart: cartProduct,
-        totalPaid: amount
+        totalPaid: totalAmount,
+        moneyToBeSubtract: discountedAmount || 0,
+        payment_method: "",
+        last_four_digit: "",
     }
 
     let personalInfo = {
@@ -94,19 +91,20 @@ export const POST = async (request) => {
         address: cusInfo?.address,
         apartment: cusInfo?.apartment,
         postalCode: cusInfo?.postalCode,
-        firstVisitedDate: cusInfo?.formattedDate,
-        firstVisitedTime: cusInfo?.formattedTime,
-        about: "",
-        orders: [{ orderNumber: `abn${orderNumber}`, status: "abandoned" }]
+        orderID: `A${orderID}`
     }
 
-    let orderNumberOfDB = `abn${orderNumber}`;
+    let orderIDOfDB = `A${orderID}`;
     try {
         let result1;
         if (cusInfo?.cardID !== 'undefined') {
             const existingCart = await OrderSchema.findById(cusInfo?.cardID).select('-cart');
             if (existingCart) {
-                orderNumber = existingCart?.orderNumber;
+                orderID = existingCart?.orderID;
+                orderIDOfDB = existingCart?.orderID;
+                personalInfo.orderID = orderID;
+                orderData.orderID = orderID;
+
                 result1 = await OrderSchema.findByIdAndUpdate(cusInfo?.cardID, orderData, { new: true });
             }
             else {
@@ -119,55 +117,27 @@ export const POST = async (request) => {
         }
 
 
-        const existingUser = await CustomerSchema.findOne({ email: cusInfo?.email });
-        if (existingUser) {
-            personalInfo.firstVisitedDate = existingUser?.formattedDate || cusInfo?.formattedDate;
-            personalInfo.firstVisitedTime = existingUser?.formattedTime || cusInfo?.formattedTime;
-            personalInfo.about = existingUser?.about || "";
+        const existingUser = await CustomerSchema.findOne({
+            $and: [
+                { email: email },
+                { orderID: orderID }
+            ]
+        });
 
-            const result2 = await CustomerSchema.updateOne({ email: cusInfo?.email }, personalInfo, { new: true });
-            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, result1, orderNumberOfDB } })
+        if (existingUser) {
+            personalInfo.orderID = existingUser?.orderID || orderID;
+            const result2 = await CustomerSchema.updateOne({ $and: [{ email: email }, { orderID: orderID }] }, personalInfo, { new: true });
+            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, result1, orderIDOfDB } })
         }
         else {
             const data2 = new CustomerSchema(personalInfo);
             const result2 = await data2.save();
-            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, result1, orderNumberOfDB } })
+            return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, result1, orderIDOfDB } })
         }
 
 
     }
-    // try {
-    //     const existingCart = await OrderSchema.findOne({ email: cusInfo?.email }).select('-cart');
-    //     if (existingCart) {
-    //         orderNumber = existingCart?.orderNumber;
-    //         // orderData.date = formattedDate;
-    //         // orderData.time = formattedTime;
 
-    //         const result = await OrderSchema.updateOne({ email: cusInfo?.email }, orderData, { new: true })
-    //     }
-    //     else {
-    //         const data = new OrderSchema(orderData);
-    //         const result = await data.save();
-    //     }
-
-
-    //     const existingUser = await CustomerSchema.findOne({ email: cusInfo?.email });
-    //     if (existingUser) {
-    //         personalInfo.firstVisitedDate = existingUser?.formattedDate || cusInfo?.formattedDate;
-    //         personalInfo.firstVisitedTime = existingUser?.formattedTime || cusInfo?.formattedTime;
-    //         personalInfo.about = existingUser?.about || "";
-
-    //         const result = await CustomerSchema.updateOne({ email: cusInfo?.email }, personalInfo, { new: true });
-    //         return NextResponse.json({ message: "Customer added & card created", status: true, data: { result, orderNumberOfDB } })
-    //     }
-    //     else {
-    //         const data2 = new CustomerSchema(personalInfo);
-    //         const result2 = await data2.save();
-    //         return NextResponse.json({ message: "Customer added & card created", status: true, data: { result2, orderNumberOfDB } })
-    //     }
-
-
-    // }
     catch (error) {
         console.log(error)
         return NextResponse.json({ message: "Customer & card unable to add!", status: false });

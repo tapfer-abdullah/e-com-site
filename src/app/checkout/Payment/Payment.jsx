@@ -76,7 +76,7 @@ const ELEMENTS_OPTIONS = {
 };
 
 const Payment = ({ cusInfo, total, discountCode }) => {
-  const { dataForBxGy, cartData, finalCartData } = useContext(OrderStateProvider);
+  const { dataForBxGy, cartData, finalCartData, customer, setCustomer } = useContext(OrderStateProvider);
   const router = useRouter();
   // const [expanded, setExpanded] = React.useState("panel2");
   const [expanded, setExpanded] = React.useState("");
@@ -87,6 +87,7 @@ const Payment = ({ cusInfo, total, discountCode }) => {
   };
 
   const { address, apartment, city, country, email, firstName, lastName, phoneNumber, postalCode, shipping, tips } = cusInfo;
+  console.log({ discountedAmount: cusInfo.discountedAmount });
 
   const [errorMessage, setErrorMessage] = useState("");
   const [cardType, setCardType] = useState(null);
@@ -95,6 +96,7 @@ const Payment = ({ cusInfo, total, discountCode }) => {
   //-----------------------------------
   //          stripe payment          |
   // ----------------------------------
+  console.log({ expanded });
   React.useEffect(() => {
     if (expanded == "panel1" || expanded == "panel2") {
       if (!address || !apartment || !city || !country || !email || !firstName || !lastName || !postalCode) {
@@ -108,10 +110,27 @@ const Payment = ({ cusInfo, total, discountCode }) => {
         return;
       }
 
+      // console.log({ expanded });
+      if (expanded !== "panel1") {
+        // console.log({ expanded }, " inside if..");
+        return;
+      }
+
+      // update customer info and card data
+      axiosHttp.post("/checkout/abandoned", { cusInfo, cart: finalCartData, discountCode }).then((res) => {
+        // console.log(res.data, res.data?.data?.result1?._id);
+        // console.log(res.data);
+
+        cusInfo.orderID = res?.data?.data?.orderIDOfDB;
+        localStorage.setItem("obs-card-id", res.data?.data?.result1?._id);
+        setCustomer({ ...customer, email: email, orderID: res?.data?.data?.orderIDOfDB });
+      });
+
       axiosHttp
-        .post("/payment/stripe-payment-intent", { personalInfo: cusInfo, dataForBxGy, shipping, tips, discountCode, email, selectedCountry: { label: country } })
+        .post("/payment/stripe-payment-intent", { customer, personalInfo: cusInfo, dataForBxGy, shipping, tips, discountCode, email, selectedCountry: { label: country } })
         .then((data) => {
           setClientSecret(data.data.clientSecret);
+          // console.log(data.data.clientSecret);
         })
         .catch((error) => {
           console.log({ error });
@@ -140,7 +159,18 @@ const Payment = ({ cusInfo, total, discountCode }) => {
   const [paypalOrderID, setPaypalOrderID] = useState("");
 
   const createOrder = async (data, actions) => {
+    console.log("paypal.....");
     // console.log({ dataForBxGy, shipping, tips, discountCode, email, selectedCountry: { label: country } });
+
+    axiosHttp.post("/checkout/abandoned", { cusInfo, cart: finalCartData, discountCode }).then((res) => {
+      // console.log(res.data, res.data?.data?.result1?._id);
+      console.log(res.data);
+
+      cusInfo.orderID = res?.data?.data?.orderIDOfDB;
+      localStorage.setItem("obs-card-id", res.data?.data?.result1?._id);
+      setCustomer({ ...customer, email: email, orderID: res?.data?.data?.orderIDOfDB });
+    });
+
     return fetch("https://odbhootstore.vercel.app/api/payment/paypal/create-paypal-order", {
       method: "POST",
       headers: {
@@ -177,19 +207,40 @@ const Payment = ({ cusInfo, total, discountCode }) => {
       .then((response) => response.json())
       .then((details) => {
         const { payer, id } = details;
-        console.log({ payer, details });
+        // console.log({ payer, details });
 
         if (details?.status == "COMPLETED") {
           toast.success("Payment Successful.");
           setPaypalSuccess(true);
+          let cardID = localStorage.getItem("obs-card-id");
+
+          axiosHttp
+            .patch(`/payment/success`, { email, orderID: customer?.orderID, cardID, payment_method: "PayPal" })
+            .then((response) => {
+              console.log(response.data);
+
+              axiosHttp.post("/confirmationMail", { cardID, orderID: customer?.orderID }).then((res) => {
+                toast.success("Order confirmation mail has been sended!");
+                console.log(res.data);
+              });
+
+              localStorage.setItem("obs-card-id", "undefined");
+              router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
+
+              // axiosHttp.post("/confirmationMail", { dataForBxGy, shipping, tips, discountCode, email, selectedCountry: { label: country } }).then((res) => {
+              //   console.log(res.data);
+              // });
+            })
+            .catch((error) => {
+              console.error("Error fetching payment details from Stripe:", error);
+            });
 
           // axiosHttp.post("/confirmationMail", { dataForBxGy, shipping, tips, discountCode }).then((res) => {
-          axiosHttp.post("/confirmationMail", { dataForBxGy, shipping, tips, discountCode, email, selectedCountry: { label: country } }).then((res) => {
-            console.log(res.data);
-          });
+          // axiosHttp.post("/confirmationMail", { dataForBxGy, shipping, tips, discountCode, email, selectedCountry: { label: country } }).then((res) => {
+          //   console.log(res.data);
+          // });
         }
 
-        router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
         // router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
       })
       .catch((error) => {

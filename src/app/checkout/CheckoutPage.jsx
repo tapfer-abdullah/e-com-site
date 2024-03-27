@@ -5,6 +5,7 @@ import React, { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import { axiosHttp } from "../helper/axiosHttp";
+import "./Checkout.css";
 import CheckoutPersonalInfo from "./CheckoutPersonalInfo";
 import CheckoutProductsInfo from "./CheckoutProductsInfo";
 
@@ -33,7 +34,6 @@ const CheckoutPage = () => {
   const [discountType, setDiscountType] = useState("");
   const [disAdditionalType, setDisAdditionalType] = useState("");
   // buy x get y
-  const [BxGyCartArray, setBxGyCartArray] = useState([]);
 
   const [discountInput, setDiscountInput] = useState("");
   const [isLoading, setLoading] = useState(false);
@@ -45,6 +45,13 @@ const CheckoutPage = () => {
   // customer info..................
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [email, setEmail] = useState("");
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const [discountedAmount, setDiscountedAmount] = useState(0);
+
   const [cusInfo, setCusInfo] = useState({
     firstName: "",
     lastName: "",
@@ -58,14 +65,10 @@ const CheckoutPage = () => {
     discountCode,
     shipping: shippingAmount,
     tips: tip,
+    discountedAmount: 0,
   });
 
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const [discountedAmount, setDiscountedAmount] = useState(0);
-  // const [finalCartData, setFinalCartData] = useState(cartData || []);
+  // console.log({ disAdditionalType, discountedAmount: cusInfo.discountedAmount, shippingAmount });
 
   useEffect(() => {
     let sum = 0;
@@ -93,7 +96,7 @@ const CheckoutPage = () => {
     if (disAdditionalType !== "AOffO") {
       setDiscountedAmount(discount);
     }
-    console.log({ discountedAmount, finalCartData });
+    // console.log({ discountedAmount, finalCartData });
   }, [isLoading, disError, finalCartData.length, cartData, discountCode, tip, shippingAmount, setSubtotal, setQuantity, disAdditionalType, discountedAmount, finalCartData]);
 
   const handleCountryChange = (event, value) => {
@@ -103,6 +106,7 @@ const CheckoutPage = () => {
   const handleDiscountCode = (code) => {
     setPromoCode("");
     setLoading(true);
+    cusInfo.discountedAmount = 0;
 
     if (!code) {
       setDiscountCode("");
@@ -133,6 +137,7 @@ const CheckoutPage = () => {
       setDisAdditionalType(response?.discountType);
       switch (response?.discountType) {
         case "BxGy": {
+          cusInfo.discountedAmount = 0;
           if (response?.issue == "passed") {
             setDiscountCode(code);
             setCusInfo.discountCode = code;
@@ -150,6 +155,7 @@ const CheckoutPage = () => {
           break;
         }
         case "AOffP": {
+          cusInfo.discountedAmount = 0;
           if (response?.issue == "passed") {
             setFinalCartData(response.data);
             toast.success("Discount code applied successfully");
@@ -173,6 +179,7 @@ const CheckoutPage = () => {
             if (response.data.type == "Percentage") {
               let moneyToBeSubtract = subTotal * (parseInt(response.data.amount) / 100);
               setDiscountedAmount(moneyToBeSubtract);
+              cusInfo.discountedAmount = moneyToBeSubtract;
               toast.success("Discount code applied successfully");
               setDiscountCode(code);
               setCusInfo.discountCode = code;
@@ -180,6 +187,7 @@ const CheckoutPage = () => {
               setDiscountInput("");
             } else if (response.data.type == "Fixed") {
               setDiscountedAmount(parseInt(response.data.amount));
+              cusInfo.discountedAmount = parseInt(response.data.amount);
               toast.success("Discount code applied successfully");
               setDiscountCode(code);
               setCusInfo.discountCode = code;
@@ -200,6 +208,7 @@ const CheckoutPage = () => {
             toast.success("Discount code applied successfully");
             setDiscountCode(code);
             setCusInfo.discountCode = code;
+            cusInfo.discountedAmount = shippingAmount;
             setDisError("");
             setDiscountInput("");
             // setShippingAmount(0);
@@ -247,6 +256,7 @@ const CheckoutPage = () => {
 
   // abandoned order
   useEffect(() => {
+    // console.log({ yes: "no..", email });
     function isValidEmail(email) {
       const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$/;
       return emailPattern.test(email);
@@ -254,19 +264,26 @@ const CheckoutPage = () => {
 
     let cardID = localStorage.getItem("obs-card-id");
     // console.log({ cardID });
+    // console.log({ customer, finalCartData });
 
     if (isValidEmail(cusInfo?.email)) {
+      // console.log({ email });
       cusInfo.discountCode = discountCode;
       cusInfo.cardID = cardID || "";
-      axiosHttp.post("/checkout/abandoned", { cusInfo, cart: dataForBxGy, discountCode, amount: total }).then((res) => {
-        // console.log(res.data, res.data?.data?.result1?._id);
-        localStorage.setItem("obs-card-id", res.data?.data?.result1?._id);
-        setCustomer({ ...customer, email: email, orderNumber: res?.data?.data?.orderNumberOfDB });
-      });
-    }
-  }, [cusInfo, dataForBxGy, discountCode, total]);
 
-  // console.log({ customer });
+      // { dataForBxGy, shipping, tips, discountCode, email, selectedCountry: { label: country } }
+
+      console.log({ customer, finalCartData });
+      axiosHttp.post("/checkout/abandoned", { cusInfo, cart: finalCartData, discountCode }).then((res) => {
+        // console.log(res.data, res.data?.data?.result1?._id);
+        // console.log(res.data);
+
+        localStorage.setItem("obs-card-id", res.data?.data?.result1?._id);
+        setCustomer({ ...customer, email: email, orderID: res?.data?.data?.orderIDOfDB });
+      });
+    } else {
+    }
+  }, [email, tip, finalCartData]);
 
   return (
     <>
@@ -308,44 +325,48 @@ const CheckoutPage = () => {
       </div>
 
       <div className="grid grid-cols-12 mx-auto mt-20">
-        <div className="col-start-2 col-span-10 grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <CheckoutPersonalInfo
-            cusInfo={cusInfo}
-            setCusInfo={setCusInfo}
-            setTips={setTip}
-            subTotal={subTotal}
-            email={email}
-            setEmail={setEmail}
-            selectedCountry={selectedCountry}
-            setSelectedCountry={setSelectedCountry}
-            total={total}
-            setTotal={setTotal}
-            discountCode={discountCode}
-          />
-          <CheckoutProductsInfo
-            // finalCartData={finalCartData}
-            discountedAmount={discountedAmount}
-            total={total}
-            setTotal={setTotal}
-            email={email}
-            selectedCountry={selectedCountry}
-            handleDiscountCode={handleDiscountCode}
-            tip={tip}
-            subTotal={subTotal}
-            setSubtotal={setSubtotal}
-            setQuantity={setQuantity}
-            disError={disError}
-            discountCode={discountCode}
-            discountType={discountType}
-            disAdditionalType={disAdditionalType}
-            discountInput={discountInput}
-            setDiscountInput={setDiscountInput}
-            isLoading={isLoading}
-            setLoading={setLoading}
-            shipping={shipping}
-            shippingAmount={shippingAmount}
-            shippingReqAmount={shippingReqAmount}
-          />
+        <div className="col-start-2 col-span-10 grid grid-cols-1 lg:grid-cols-2 gap-5 checkout-container">
+          <div className="personal-info">
+            <CheckoutPersonalInfo
+              cusInfo={cusInfo}
+              setCusInfo={setCusInfo}
+              setTips={setTip}
+              subTotal={subTotal}
+              email={email}
+              setEmail={setEmail}
+              selectedCountry={selectedCountry}
+              setSelectedCountry={setSelectedCountry}
+              total={total}
+              setTotal={setTotal}
+              discountCode={discountCode}
+            />
+          </div>
+          <div className="product-info-container">
+            <CheckoutProductsInfo
+              // finalCartData={finalCartData}
+              discountedAmount={discountedAmount}
+              total={total}
+              setTotal={setTotal}
+              email={email}
+              selectedCountry={selectedCountry}
+              handleDiscountCode={handleDiscountCode}
+              tip={tip}
+              subTotal={subTotal}
+              setSubtotal={setSubtotal}
+              setQuantity={setQuantity}
+              disError={disError}
+              discountCode={discountCode}
+              discountType={discountType}
+              disAdditionalType={disAdditionalType}
+              discountInput={discountInput}
+              setDiscountInput={setDiscountInput}
+              isLoading={isLoading}
+              setLoading={setLoading}
+              shipping={shipping}
+              shippingAmount={shippingAmount}
+              shippingReqAmount={shippingReqAmount}
+            />
+          </div>
         </div>
         <div className="bg-[#f5f5f5] -mt-5"></div>
       </div>

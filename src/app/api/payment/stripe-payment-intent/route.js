@@ -1,8 +1,10 @@
-// import { connectDB } from "@/app/helper/db";
+import { connectDB } from "@/app/helper/db";
+import { Products } from "@/app/models/products";
 import DiscountCodeChecker from "@/Hooks/DiscountCodeChecker/DiscountCodeChecker";
 import { NextResponse } from "next/server";
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
+connectDB();
 
 const calculateOrderAmount = (data, shipping, tips, discountCode, disAdditionalType, moneyToBeSubtract) => {
     let sum = 0;
@@ -15,7 +17,6 @@ const calculateOrderAmount = (data, shipping, tips, discountCode, disAdditionalT
     console.log({ sum })
     return sum;
 };
-
 
 const resultOfDiscountCode = (response, shipping, dataForBxGy) => {
     // console.log({ response });
@@ -77,6 +78,7 @@ const resultOfDiscountCode = (response, shipping, dataForBxGy) => {
 export const POST = async (request) => {
     const receivedData = await request.json();
     const { dataForBxGy, shipping, tips, discountCode, email, selectedCountry, personalInfo } = receivedData;
+    console.log({ personalInfo })
 
     let disAdditionalType = "";
     let isDiscounted = false;
@@ -117,25 +119,10 @@ export const POST = async (request) => {
         totalAmount = calculateOrderAmount(data, shipping, tips, discountCode, disAdditionalType, moneyToBeSubtract);
     }
 
-    // console.log({ personalInfo, cart })
-
-    // let totalAmount = 0;
 
     if (!personalInfo?.email) {
         return NextResponse.json({ message: "Email is required!", status: false });
     }
-
-    // if (personalInfo?.discountCode) {
-    //     // to do: discount code validate and calculation 
-    //     totalAmount = amount;
-    // }
-    // else {
-    //     totalAmount = calculateOrderAmount(cart, personalInfo?.shipping || 0)
-    //     totalAmount += personalInfo?.tips;
-    //     // console.log({ totalAmount })
-    // }
-
-    // return NextResponse.json({ message: "Checking..!", status: false });
 
     const customer = await stripe.customers.create({
         name: personalInfo?.firstName + " " + personalInfo?.lastName,
@@ -156,8 +143,10 @@ export const POST = async (request) => {
         payment_method_types: ["card"],
         customer: customer.id,
         receipt_email: personalInfo?.email || null,
-        description: "Payment for order #1004",
+        description: `Payment for order ${personalInfo?.orderID}`,
     });
+
+    // console.log({ paymentIntent })
 
 
     return NextResponse.json({

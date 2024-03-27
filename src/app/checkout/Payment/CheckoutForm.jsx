@@ -2,7 +2,7 @@
 import { OrderStateProvider } from "@/Components/State/OrderState";
 import { axiosHttp } from "@/app/helper/axiosHttp";
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import Swal from "sweetalert2";
 
 export default function CheckoutForm({ cusInfo }) {
@@ -13,7 +13,8 @@ export default function CheckoutForm({ cusInfo }) {
   const [message, setMessage] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  // console.log({ cusInfo });
+  // console.log({ discountedAmount: cusInfo });
+  const [paymentInfo, setPaymentInfo] = useState(null);
 
   const { address, apartment, city, country, discountCode, email, firstName, lastName, phoneNumber, postalCode, shipping, tips } = cusInfo;
 
@@ -33,12 +34,13 @@ export default function CheckoutForm({ cusInfo }) {
       return;
     }
 
+    let cardID = localStorage.getItem("obs-card-id");
+
     setIsLoading(true);
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `https://odbhootstore.vercel.app/Payment/success.html?orderNumber=${customer?.orderNumber}&email=${customer?.email}`,
-        // return_url: `https://odbhootstore.vercel.app/Payment/success.html?orderNumber=${customer?.orderNumber}&email=${customer?.email}`,
+        return_url: `https://odbhootstore.vercel.app/Payment/success.html?orderID=${customer?.orderID}&email=${customer?.email}&cardID=${cardID}`,
       },
     });
 
@@ -49,9 +51,16 @@ export default function CheckoutForm({ cusInfo }) {
     }
 
     if (paymentIntent.status === "succeeded") {
-      axiosHttp.post("/users/customer", { status: "yes" }).then((res) => {
-        console.log(res?.data);
-      });
+      axiosHttp
+        .post("/users/customer", { status: "yes" })
+        .then((res) => {
+          console.log(res?.data);
+        })
+        .catch((error) => {
+          console.log({ error });
+          setMessage(error?.message);
+          setIsLoading(false);
+        });
 
       console.log({ success: paymentIntent });
       setMessage("Payment succeeded!");

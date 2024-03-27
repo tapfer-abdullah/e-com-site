@@ -36,6 +36,10 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         min: 0
     },
+    moneyToBeSubtract: {
+        type: Number,
+        min: 0
+    },
     shipping: Number,
     tips: {
         type: Number,
@@ -44,6 +48,10 @@ const orderSchema = new mongoose.Schema({
     },
     status: String,
     orderNumber: String,
+    orderID: String,
+    orderTrackingNumber: String,
+    payment_method: String,
+    last_four_digit: String,
     date: String,
     time: String,
     cart: [singleCartProduct]

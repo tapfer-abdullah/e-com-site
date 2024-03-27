@@ -1,5 +1,7 @@
 import DiscountCodeChecker from "@/Hooks/DiscountCodeChecker/DiscountCodeChecker";
+import { CustomerSchema } from "@/app/models/customerInfo";
 import { DiscountSchema } from "@/app/models/discountCode";
+import { OrderSchema } from "@/app/models/order";
 import { Products } from "@/app/models/products";
 import { transporter } from "@/config/nodeMailer";
 import { NextResponse } from "next/server";
@@ -14,7 +16,7 @@ function calculateSubTotal(cart) {
 }
 
 // const htmlData = (cart, shipping, tips) => {
-const htmlData = (cart, shipping, tips, discountCode, disAdditionalType, moneyToBeSubtract) => {
+const htmlData = (cart, shipping, tips, discountCode, disAdditionalType, moneyToBeSubtract, orderIDFromDB, orderNumber, cusInfo, payment_method) => {
     let emailContent = ``;
     // emailContent += `<!DOCTYPE html>
     // <html lang="en">
@@ -27,7 +29,16 @@ const htmlData = (cart, shipping, tips, discountCode, disAdditionalType, moneyTo
     // <body>`;
 
     emailContent += `<div style="width: 99%; max-width: 600px; margin: 0 auto;">
-        <h2>Thank you for your order!</h2>
+        <p>ORDER: #${orderNumber}</p>
+        <p>ORDER ID: #${orderIDFromDB}</p>
+        <h2>Thank you for your purchase!</h2>
+
+        <div>
+            <p>Hi, ${cusInfo?.firstName}, we're getting your order ready to be shipped. Your order will be sent as soon as possible. All the OBBHOOTSTORE team thanks you for your order. Your order has been validated and is in preparation. Here are some important information:</p>
+            </br>
+        </div>
+
+
         <p style="font-size: 20px; font-weight:600;">Order Summary</p>
     `;
 
@@ -85,17 +96,16 @@ const htmlData = (cart, shipping, tips, discountCode, disAdditionalType, moneyTo
                     <td style="text-align: right;">`;
 
     if (disAdditionalType == "FS" && shipping == moneyToBeSubtract) {
-        emailContent += `<p style="text-decoration: line-through; color: #EF4444; font-weight: 500; padding: 2px; margin: 0">€ ${shipping}</p>
-                         <p style="color: #34D399; font-weight: 500;">Free</p>
-                    </td>`
+        emailContent += `<p style="text-align: right; text-decoration: line-through; color: #EF4444; font-weight: 500; padding: 2px; margin: 0">€ ${shipping}</p>
+                         <p style="color: #34D399; font-weight: 500; padding: 0px; margin: 0">Free</p>
+                    </td></tr>`
     }
     else {
         emailContent += `
             <p style="text-align: right; padding: 3px; margin: 0">€ ${shipping}</p>
-        </td>`
+        </td></tr>`
     }
 
-    emailContent += `</tr>`
 
 
     if (tips > 0) {
@@ -123,11 +133,11 @@ const htmlData = (cart, shipping, tips, discountCode, disAdditionalType, moneyTo
         else {
             emailContent += `<p style="padding: 3px; margin: 0;">- € ${subtotal - totalPrice}</p>
                             </td>
-                        </tr> </table>`
+                        </tr>`
         }
     }
 
-    emailContent += `<p style="border-bottom: 2px solid #A0AEC0; padding: 10px 0; margin: 0;"></p>
+    emailContent += `</table><p style="border-bottom: 2px solid #A0AEC0; padding: 10px 0; margin: 0;"></p>
     <table>
     <tr style="font-size: 1.25rem; font-weight: bold; vertical-align: middle;">
                         <td style="text-align: left;">Total:</td>
@@ -143,13 +153,21 @@ const htmlData = (cart, shipping, tips, discountCode, disAdditionalType, moneyTo
 
     emailContent += `
     </table>
-            </div >
-            `;
+    </div >`;
+
+    emailContent += `<div>
+        <h2>Customer information</h2>
+        </br>
+        <h3>Shipping address</h3>
+        <p>${cusInfo?.firstName} ${cusInfo?.lastName}</p>
+        <p>${cusInfo?.apartment}, ${cusInfo?.address}</p>
+        <p>${cusInfo?.postalCode || 'cusInfo?.postalCode'} ${cusInfo?.city}</p>
+        <p>${cusInfo?.country || 'cusInfo?.country'}</p>
+        <p>Payment method: ${payment_method}</p>
+        </div>`
 
     return emailContent;
 }
-
-
 
 
 const resultOfDiscountCode = (response, shipping, dataForBxGy) => {
@@ -238,15 +256,108 @@ export const POST = async (request) => {
     // return NextResponse.json({ status: false, message: "Unable to send mail", data: "error" });
 
 
-    const receivedData = await request.json();
-    const { dataForBxGy, shipping, tips, discountCode, email, selectedCountry } = receivedData;
-    // console.log({ receivedData })
+    const Data = await request.json();
+    const { cardID, orderID } = Data;
+    // console.log({ Data });
+
+    // const newData = orderID.replace(/^A/i, 'S');
+
+    const orderData = await OrderSchema.findById(cardID);
+    const { moneyToBeSubtract: minusAmount, orderNumber, orderID: orderIDFromDB, shipping, tips, status, totalPaid, discountCode, email, payment_method, last_four_digit } = orderData;
+
+    if (status !== "paid") {
+        return NextResponse.json({ status: false, message: "Payment is not completed yet. Unable to send order confirmation mail!", data: error });
+    }
+
+
+    let updatedArray = [];
+
+    const allProductIDs = orderData?.cart.map(p => p.productID);
+    const allProductSKU = orderData?.cart.map(p => p.sku);
+
+    //Getting product data form DB
+    const allProductData = await Products.find({ _id: { $in: allProductIDs } }).select({ title: 1, price: 1, _id: 1, colors: 1 });
+
+    allProductData.map(p => {
+        p.colors.map(c => {
+            for (let i = 0; i < c.allSKU.length; i++) {
+                if (allProductSKU.includes(c.allSKU[i].sku)) {
+                    for (let j = 0; j < orderData.cart.length; j++) {
+                        let obj = {};
+                        if (orderData.cart[j]["sku"] === c.allSKU[i].sku) {
+                            obj["name"] = p.title;
+                            obj["price"] = p.price;
+                            obj["color"] = c.name;
+                            obj["size"] = c.allSKU[i].size;
+                            obj["img"] = c.imageUrl;
+                            obj["quantity"] = orderData.cart[j].quantity;
+                            obj["discount"] = orderData.cart[j].discountAmount;
+                            obj["productID"] = orderData.cart[j].productID;
+                            updatedArray.push(obj);
+                        }
+                    }
+                }
+            }
+        })
+    });
 
     let disAdditionalType = "";
-    let isDiscounted = false;
-    let moneyToBeSubtract = 0;
-    let data = dataForBxGy;
+    let moneyToBeSubtract = minusAmount || 0;
+    let data = updatedArray;
     let htmlDataForMail = '';
+    let cusInfo = {};
+
+    if (discountCode) {
+        const disType = await DiscountSchema.findOne({ title: { $regex: new RegExp(`^${discountCode}$`, "i") } }).select("discountCodeType");
+        // console.log({ disType })
+        disAdditionalType = disType.discountCodeType;
+    }
+
+    cusInfo = await CustomerSchema.findOne({
+        $and: [
+            { email: email },
+            { orderID: orderIDFromDB }
+        ]
+    });
+
+
+    // console.log({ customerData })
+    htmlDataForMail = htmlData(data, shipping, tips, discountCode, disAdditionalType, moneyToBeSubtract, orderIDFromDB, orderNumber, cusInfo, payment_method);
+
+    // return NextResponse.json({ htmlDataForMail });
+
+    const message = {
+        from: process.env.EMAIL_ADDRESS,
+        to: email,
+        // replyTo: data.email,
+        subject: "Thanks for your order",
+        text: "Order confirmation mail from ODBHOOTSTORE",
+        html: htmlDataForMail,
+    };
+
+    try {
+        const result = await transporter.sendMail(message);
+        console.log({ result });
+        return NextResponse.json({ status: true, message: "Mail sended successfully", data: result });
+    }
+    catch (error) {
+        console.log({ error })
+        return NextResponse.json({ status: false, message: "Unable to send mail", data: error });
+    }
+
+
+
+    return NextResponse.json({ updatedArray });
+    // return NextResponse.json({ allProductData, allProductSKU });
+    const receivedData = await request.json();
+    // const { dataForBxGy, shipping, tips, discountCode, email, selectedCountry } = receivedData;
+    // console.log({ receivedData })
+
+    // let disAdditionalType = "";
+    // let isDiscounted = false;
+    // let moneyToBeSubtract = 0;
+    // let data = dataForBxGy;
+    // let htmlDataForMail = '';
 
     if (discountCode) {
         const response = await DiscountCodeChecker(receivedData);
@@ -283,14 +394,14 @@ export const POST = async (request) => {
     // return NextResponse.json({ htmlDataForMail });
 
 
-    const message = {
-        from: process.env.EMAIL_ADDRESS,
-        to: email,
-        // replyTo: data.email,
-        subject: "Thanks for your order",
-        text: "Order confirmation mail from ODBHOOTSTORE",
-        html: htmlDataForMail,
-    };
+    // const message = {
+    //     from: process.env.EMAIL_ADDRESS,
+    //     to: email,
+    //     // replyTo: data.email,
+    //     subject: "Thanks for your order",
+    //     text: "Order confirmation mail from ODBHOOTSTORE",
+    //     html: htmlDataForMail,
+    // };
 
     try {
         const result = await transporter.sendMail(message);

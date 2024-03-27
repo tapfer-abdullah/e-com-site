@@ -1,14 +1,5 @@
 const { default: mongoose } = require("mongoose");
 
-const dateSchema = new mongoose.Schema({
-    year: String,
-    month: String,
-    Day: String
-})
-const timeSchema = new mongoose.Schema({
-    hour: String,
-    min: String
-})
 
 const orderSchema = new mongoose.Schema({
     orderNumber: String,
@@ -29,10 +20,8 @@ const customerSchema = new mongoose.Schema({
     address: String,
     apartment: String,
     postalCode: String,
-    firstVisitedDate: dateSchema,
-    firstVisitedTime: timeSchema,
     about: String,
-    orders: [orderSchema]
+    orderID: String
 })
 
 
