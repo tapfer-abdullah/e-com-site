@@ -168,7 +168,7 @@ async function createOrder(dataForBxGy, shipping, tips, discountCode, disAdditio
                     shipping_preference: 'GET_FROM_FILE',
                     user_action: "PAY_NOW",
                     brand_name: "ODBHOOTSTORE",
-                    return_url: `https://odbhootstore.vercel.app/Payment/success.html?orderNumber=${'ff00'}`,
+                    return_url: `https://osthirchoice.vercel.app/Payment/success.html?orderNumber=${'ff00'}`,
                     cancel_url: "https://example.com/cancel",
                 },
             }),

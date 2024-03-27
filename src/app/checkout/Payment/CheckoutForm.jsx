@@ -40,7 +40,7 @@ export default function CheckoutForm({ cusInfo }) {
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `https://odbhootstore.vercel.app/Payment/success.html?orderID=${customer?.orderID}&email=${customer?.email}&cardID=${cardID}`,
+        return_url: `https://osthirchoice.vercel.app/Payment/success.html?orderID=${customer?.orderID}&email=${customer?.email}&cardID=${cardID}`,
       },
     });
 

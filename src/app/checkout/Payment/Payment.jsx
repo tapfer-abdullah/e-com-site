@@ -171,7 +171,7 @@ const Payment = ({ cusInfo, total, discountCode }) => {
       setCustomer({ ...customer, email: email, orderID: res?.data?.data?.orderIDOfDB });
     });
 
-    return fetch("https://odbhootstore.vercel.app/api/payment/paypal/create-paypal-order", {
+    return fetch("https://osthirchoice.vercel.app/api/payment/paypal/create-paypal-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -195,7 +195,7 @@ const Payment = ({ cusInfo, total, discountCode }) => {
   };
 
   const onApprove = async (data, actions) => {
-    return fetch("https://odbhootstore.vercel.app/api/payment/paypal/capture-paypal-order", {
+    return fetch("https://osthirchoice.vercel.app/api/payment/paypal/capture-paypal-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -225,7 +225,7 @@ const Payment = ({ cusInfo, total, discountCode }) => {
               });
 
               localStorage.setItem("obs-card-id", "undefined");
-              router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
+              router.push(`https://osthirchoice.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
 
               // axiosHttp.post("/confirmationMail", { dataForBxGy, shipping, tips, discountCode, email, selectedCountry: { label: country } }).then((res) => {
               //   console.log(res.data);
@@ -241,7 +241,7 @@ const Payment = ({ cusInfo, total, discountCode }) => {
           // });
         }
 
-        // router.push(`https://odbhootstore.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
+        // router.push(`https://osthirchoice.vercel.app/Payment/success.html?payment_intent=${id}&email=${payer?.email_address}`);
       })
       .catch((error) => {
         console.log({ error });
